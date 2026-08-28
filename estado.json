@@ -1,0 +1,49 @@
+{
+  "eixos": {
+    "RTIEBT": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "Motores Elétricos WEG": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "Cartografia e SIG (ArcGIS/QGIS)": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "PostgreSQL/PostGIS": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "Administração Linux (Rocky/Podman)": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "Python": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    }
+  },
+  "janela_notificada_hoje": {},
+  "sugestao_hoje": {},
+  "ultimo_update_id_telegram": 999388759
+}

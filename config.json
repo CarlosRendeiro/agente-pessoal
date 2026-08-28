@@ -1,0 +1,36 @@
+{
+  "_comentario": "Edita este arquivo livremente. Horários no formato HH:MM. Dias: seg,ter,qua,qui,sex,sab,dom.",
+
+  "fuso_horario": "Europe/Lisbon",
+
+  "compromissos_fixos": [
+    {"nome": "Kairós (estágio)", "dias": ["seg","ter","qua","qui","sex"], "inicio": "09:00", "fim": "17:00"},
+    {"nome": "CTeSP (aulas)",    "dias": ["seg","ter","qua","qui","sex"], "inicio": "18:30", "fim": "23:00"}
+  ],
+
+  "janelas_estudo": [
+    {"nome": "Bloco da tarde", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:00", "fim": "18:30"},
+    {"nome": "Bloco fim de semana manhã", "dias": ["sab","dom"], "inicio": "10:00", "fim": "12:00"},
+    {"nome": "Bloco fim de semana tarde", "dias": ["sab","dom"], "inicio": "15:00", "fim": "17:30"}
+  ],
+
+  "duracao_bloco_min": 45,
+
+  "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
+
+  "eixos_estudo": [
+    {"nome": "RTIEBT",                          "peso": 3},
+    {"nome": "Motores Elétricos WEG",           "peso": 3},
+    {"nome": "Cartografia e SIG (ArcGIS/QGIS)", "peso": 1},
+    {"nome": "PostgreSQL/PostGIS",              "peso": 1},
+    {"nome": "Administração Linux (Rocky/Podman)", "peso": 1},
+    {"nome": "Python",                          "peso": 1}
+  ],
+
+  "regra_never_miss_twice": {
+    "ativa": true,
+    "faltas_para_subir_prioridade": 2
+  },
+
+  "arquivo_estado": "estado.json"
+}

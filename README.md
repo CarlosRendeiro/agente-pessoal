@@ -110,3 +110,4 @@ muito, o nível desce e a revisão volta a ser mais frequente.
 - Se o GitHub avisar que desativou o agendamento por inatividade do repositório
   (isso acontece após ~60 dias sem nenhum commit), basta ir em Actions e
   reativar — ou fazer qualquer commit pequeno.
+

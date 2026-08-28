@@ -19,18 +19,21 @@
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
 
   "eixos_estudo": [
-    {"nome": "RTIEBT",                          "peso": 3},
-    {"nome": "Motores Elétricos WEG",           "peso": 3},
-    {"nome": "Cartografia e SIG (ArcGIS/QGIS)", "peso": 1},
-    {"nome": "PostgreSQL/PostGIS",              "peso": 1},
-    {"nome": "Administração Linux (Rocky/Podman)", "peso": 1},
-    {"nome": "Python",                          "peso": 1}
+    {"nome": "RTIEBT",                                          "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas"},
+    {"nome": "Motores Elétricos WEG",                           "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-weg-notas"},
+    {"nome": "Cartografia e SIG (ArcGIS Pro, QGIS)",             "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-sig"},
+    {"nome": "Banco de dados geoespacial (PostgreSQL/PostGIS)", "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "postgis-geo-queries"},
+    {"nome": "Administração Linux (Rocky Linux, Podman)",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-infra-notes"},
+    {"nome": "Python",                                          "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas"}
   ],
 
   "regra_never_miss_twice": {
     "ativa": true,
     "faltas_para_subir_prioridade": 2
   },
+
+  "arquivo_topicos": "topicos.md",
+  "arquivo_diario": "diario.md",
 
   "arquivo_estado": "estado.json"
 }

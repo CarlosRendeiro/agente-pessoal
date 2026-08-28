@@ -1,0 +1,38 @@
+name: Agente Pessoal
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  rodar-agente:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar o agente
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 telegram_agente.py --check
+
+      - name: Salvar progresso no repositório
+        run: |
+          git config user.name "agente-pessoal-bot"
+          git config user.email "agente-pessoal-bot@users.noreply.github.com"
+          git add estado.json
+          git diff --quiet --cached || git commit -m "Atualiza progresso"
+          git push

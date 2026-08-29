@@ -43,8 +43,12 @@
       "proxima_revisao": null
     }
   },
-  "janela_notificada_hoje": {},
-  "sugestao_hoje": {},
+  "janela_notificada_hoje": {
+    "Bloco fim de semana manhã": "2026-08-29"
+  },
+  "sugestao_hoje": {
+    "Bloco fim de semana manhã": "RTIEBT"
+  },
   "ultimo_update_id_telegram": 999388768,
   "ultimo_fechamento": "2026-08-28"
 }

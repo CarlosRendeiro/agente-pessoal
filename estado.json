@@ -44,10 +44,12 @@
     }
   },
   "janela_notificada_hoje": {
-    "Bloco fim de semana manhã": "2026-08-29"
+    "Bloco fim de semana manhã": "2026-08-29",
+    "Bloco fim de semana tarde": "2026-08-29"
   },
   "sugestao_hoje": {
-    "Bloco fim de semana manhã": "RTIEBT"
+    "Bloco fim de semana manhã": "RTIEBT",
+    "Bloco fim de semana tarde": "RTIEBT"
   },
   "ultimo_update_id_telegram": 999388768,
   "ultimo_fechamento": "2026-08-28"

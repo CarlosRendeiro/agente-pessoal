@@ -2,7 +2,7 @@
   "eixos": {
     "RTIEBT": {
       "ultima_data": null,
-      "faltas_seguidas": 0,
+      "faltas_seguidas": 2,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
@@ -43,14 +43,8 @@
       "proxima_revisao": null
     }
   },
-  "janela_notificada_hoje": {
-    "Bloco fim de semana manhã": "2026-08-29",
-    "Bloco fim de semana tarde": "2026-08-29"
-  },
-  "sugestao_hoje": {
-    "Bloco fim de semana manhã": "RTIEBT",
-    "Bloco fim de semana tarde": "RTIEBT"
-  },
+  "janela_notificada_hoje": {},
+  "sugestao_hoje": {},
   "ultimo_update_id_telegram": 999388768,
-  "ultimo_fechamento": "2026-08-28"
+  "ultimo_fechamento": "2026-08-29"
 }

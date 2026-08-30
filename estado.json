@@ -1,11 +1,11 @@
 {
   "eixos": {
     "RTIEBT": {
-      "ultima_data": null,
-      "faltas_seguidas": 2,
-      "total_blocos": 0,
+      "ultima_data": "2026-08-30",
+      "faltas_seguidas": 0,
+      "total_blocos": 1,
       "nivel_revisao": 0,
-      "proxima_revisao": null
+      "proxima_revisao": "2026-08-31"
     },
     "Motores Elétricos WEG": {
       "ultima_data": null,
@@ -49,6 +49,6 @@
   "sugestao_hoje": {
     "Bloco fim de semana manhã": "RTIEBT"
   },
-  "ultimo_update_id_telegram": 999388768,
+  "ultimo_update_id_telegram": 999388769,
   "ultimo_fechamento": "2026-08-29"
 }

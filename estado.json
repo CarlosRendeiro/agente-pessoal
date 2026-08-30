@@ -43,14 +43,8 @@
       "proxima_revisao": null
     }
   },
-  "janela_notificada_hoje": {
-    "Bloco fim de semana manhã": "2026-08-30",
-    "Bloco fim de semana tarde": "2026-08-30"
-  },
-  "sugestao_hoje": {
-    "Bloco fim de semana manhã": "RTIEBT",
-    "Bloco fim de semana tarde": "Motores Elétricos WEG"
-  },
+  "janela_notificada_hoje": {},
+  "sugestao_hoje": {},
   "ultimo_update_id_telegram": 999388774,
-  "ultimo_fechamento": "2026-08-29"
+  "ultimo_fechamento": "2026-08-30"
 }

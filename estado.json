@@ -10,9 +10,9 @@
     "Motores Elétricos WEG": {
       "ultima_data": "2026-08-30",
       "faltas_seguidas": 0,
-      "total_blocos": 1,
-      "nivel_revisao": 0,
-      "proxima_revisao": "2026-08-31"
+      "total_blocos": 3,
+      "nivel_revisao": 2,
+      "proxima_revisao": "2026-09-03"
     },
     "Cartografia e SIG (ArcGIS/QGIS)": {
       "ultima_data": null,
@@ -51,6 +51,6 @@
     "Bloco fim de semana manhã": "RTIEBT",
     "Bloco fim de semana tarde": "Motores Elétricos WEG"
   },
-  "ultimo_update_id_telegram": 999388772,
+  "ultimo_update_id_telegram": 999388774,
   "ultimo_fechamento": "2026-08-29"
 }

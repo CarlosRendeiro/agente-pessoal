@@ -8,11 +8,11 @@
       "proxima_revisao": "2026-08-31"
     },
     "Motores Elétricos WEG": {
-      "ultima_data": "2026-08-30",
+      "ultima_data": "2026-08-31",
       "faltas_seguidas": 0,
-      "total_blocos": 3,
-      "nivel_revisao": 2,
-      "proxima_revisao": "2026-09-03"
+      "total_blocos": 4,
+      "nivel_revisao": 3,
+      "proxima_revisao": "2026-09-07"
     },
     "Cartografia e SIG (ArcGIS/QGIS)": {
       "ultima_data": null,
@@ -45,6 +45,6 @@
   },
   "janela_notificada_hoje": {},
   "sugestao_hoje": {},
-  "ultimo_update_id_telegram": 999388774,
+  "ultimo_update_id_telegram": 999388775,
   "ultimo_fechamento": "2026-08-30"
 }

@@ -6,7 +6,7 @@ Este script é chamado automaticamente pelo GitHub Actions a cada 15 minutos.
 Ele faz duas coisas em cada execução:
 
 1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido RTIEBT)
-   e processa os comandos.
+   e processa os comandos (com validação estrita de remetente e chat).
 2. Verifica se agora é hora de um bloco de estudo e, se for, manda uma
    mensagem no Telegram avisando qual eixo estudar.
 
@@ -14,14 +14,13 @@ Toda a configuração fica em config.json. O progresso fica em estado.json,
 que é salvo de volta no repositório automaticamente pelo GitHub Actions.
 
 Comandos que tu podes mandar pro bot no Telegram:
-  /concluido RTIEBT                         -> marca o bloco de hoje como feito (repetição espaçada)
-  /concluido RTIEBT fiz revisão de esquemas -> marca feito E regista a nota no diário do repositório do eixo
-  /topico RTIEBT Esquemas trifásicos        -> adiciona um tópico novo à lista do eixo
-  /feito RTIEBT Esquemas trifásicos          -> marca esse tópico como concluído
-  /topicos RTIEBT                            -> lista os tópicos (pendentes e concluídos) do eixo
-  /revisar            -> lista o que está vencido pra revisão agora
-  /status             -> resumo de progresso por eixo
-  /ajuda              -> lista os comandos
+  /concluido NOME_DO_EIXO [nota opcional]     -> marca o bloco de hoje como feito
+  /topico NOME_DO_EIXO texto                 -> adiciona um tópico novo à lista do eixo
+  /feito NOME_DO_EIXO texto                  -> marca esse tópico como concluído
+  /topicos NOME_DO_EIXO                      -> lista os tópicos do eixo
+  /revisar                                   -> lista o que está vencido pra revisão agora
+  /status                                    -> resumo de progresso por eixo
+  /ajuda                                     -> lista os comandos
 """
 
 import base64
@@ -35,7 +34,7 @@ import requests
 
 try:
     from zoneinfo import ZoneInfo
-except ImportError:  # Python < 3.9, não deve acontecer no runner do GitHub Actions
+except ImportError:
     ZoneInfo = None
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -43,8 +42,10 @@ CONFIG_PATH = BASE_DIR / "config.json"
 
 DIAS_PT = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"]
 
+# Variáveis de ambiente e IDs autorizados
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+ALLOWED_USER_ID = os.environ.get("TELEGRAM_ALLOWED_USER_ID") or CHAT_ID
 PROGRESSO_TOKEN = os.environ.get("PROGRESSO_REPO_TOKEN")
 
 
@@ -58,8 +59,13 @@ def caminho_estado(cfg):
 
 
 def eixo_info_default():
-    return {"ultima_data": None, "faltas_seguidas": 0, "total_blocos": 0,
-            "nivel_revisao": 0, "proxima_revisao": None}
+    return {
+        "ultima_data": None,
+        "faltas_seguidas": 0,
+        "total_blocos": 0,
+        "nivel_revisao": 0,
+        "proxima_revisao": None,
+    }
 
 
 def carregar_estado(cfg):
@@ -120,7 +126,17 @@ def buscar_mensagens_novas(estado):
     return resposta.get("result", [])
 
 
-# ---------- Lógica de repetição espaçada (igual à versão local) ----------
+def mensagem_autorizada(msg_obj):
+    """Verifica se o remetente (user_id) e a conversa (chat_id) são os permitidos."""
+    if not msg_obj:
+        return False
+    remetente_id = str(msg_obj.get("from", {}).get("id", ""))
+    chat_id = str(msg_obj.get("chat", {}).get("id", ""))
+
+    return remetente_id == str(ALLOWED_USER_ID) and chat_id == str(CHAT_ID)
+
+
+# ---------- Lógica de repetição espaçada ----------
 
 def dias_atraso(hoje, proxima_str):
     if not proxima_str:
@@ -193,8 +209,10 @@ def marcar_concluido(cfg, estado, nome_eixo, hoje):
     info["total_blocos"] += 1
     info["nivel_revisao"] = nivel
     info["proxima_revisao"] = (hoje + timedelta(days=intervalos[nivel])).isoformat()
-    return (f"Registado: bloco de {nome_eixo} concluído hoje. Total: {info['total_blocos']} blocos. "
-            f"Próxima revisão: {info['proxima_revisao']} (nível {nivel}).")
+    return (
+        f"Registado: bloco de {nome_eixo} concluído hoje. Total: {info['total_blocos']} blocos. "
+        f"Próxima revisão: {info['proxima_revisao']} (nível {nivel})."
+    )
 
 
 def texto_status(cfg, estado):
@@ -297,8 +315,10 @@ def registrar_diario(cfg, nome_eixo, notas, hoje):
         entrada = f"\n## {hoje.isoformat()}\n"
         if notas:
             entrada += f"{notas}\n"
-        api_gravar_arquivo(owner, repo, caminho, conteudo + entrada, sha,
-                            f"Diário: {nome_eixo} em {hoje.isoformat()}")
+        api_gravar_arquivo(
+            owner, repo, caminho, conteudo + entrada, sha,
+            f"Diário: {nome_eixo} em {hoje.isoformat()}"
+        )
     except Exception as e:
         print(f"Erro ao registar diário de {nome_eixo}: {e}")
 
@@ -315,8 +335,10 @@ def adicionar_topico(cfg, nome_eixo, topico_texto):
         if conteudo is None:
             conteudo = f"# Tópicos — {nome_eixo}\n\n"
         novo_conteudo = conteudo.rstrip("\n") + f"\n- [ ] {topico_texto}\n"
-        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha,
-                            f"Novo tópico em {nome_eixo}: {topico_texto}")
+        api_gravar_arquivo(
+            owner, repo, caminho, novo_conteudo, sha,
+            f"Novo tópico em {nome_eixo}: {topico_texto}"
+        )
         return f"Tópico adicionado em {nome_eixo}: {topico_texto}"
     except Exception as e:
         return f"Erro ao adicionar tópico: {e}"
@@ -342,8 +364,10 @@ def marcar_topico_concluido(cfg, nome_eixo, topico_texto):
                 break
         if not encontrado:
             return f"Não encontrei um tópico pendente parecido com '{topico_texto}' em {nome_eixo}."
-        api_gravar_arquivo(owner, repo, caminho, "\n".join(linhas), sha,
-                            f"Tópico concluído em {nome_eixo}: {topico_texto}")
+        api_gravar_arquivo(
+            owner, repo, caminho, "\n".join(linhas), sha,
+            f"Tópico concluído em {nome_eixo}: {topico_texto}"
+        )
         return f"Marcado como concluído em {nome_eixo}: {topico_texto}"
     except Exception as e:
         return f"Erro ao marcar tópico: {e}"
@@ -391,7 +415,20 @@ def processar_mensagens(cfg, estado, hoje):
         update_id = msg["update_id"]
         estado["ultimo_update_id_telegram"] = max(estado.get("ultimo_update_id_telegram", 0), update_id)
 
-        texto = (msg.get("message", {}) or {}).get("text", "").strip()
+        msg_obj = msg.get("message") or msg.get("edited_message")
+        if not msg_obj:
+            continue
+
+        # --- TRAVA DE SEGURANÇA: REMETENTE E CHAT ---
+        if not mensagem_autorizada(msg_obj):
+            sender_id = msg_obj.get("from", {}).get("id")
+            sender_user = msg_obj.get("from", {}).get("username")
+            chat_id = msg_obj.get("chat", {}).get("id")
+            print(f"⚠️ Acesso bloqueado: @{sender_user} (User ID: {sender_id} | Chat ID: {chat_id})")
+            continue
+        # ---------------------------------------------
+
+        texto = msg_obj.get("text", "").strip()
         if not texto:
             continue
 
@@ -544,3 +581,4 @@ if __name__ == "__main__":
         cmd_check()
     else:
         print(__doc__)
+       

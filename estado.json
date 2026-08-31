@@ -41,6 +41,13 @@
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
+    },
+    "Motores": {
+      "ultima_data": "2026-08-31",
+      "faltas_seguidas": 0,
+      "total_blocos": 1,
+      "nivel_revisao": 0,
+      "proxima_revisao": "2026-09-01"
     }
   },
   "janela_notificada_hoje": {
@@ -49,6 +56,6 @@
   "sugestao_hoje": {
     "Bloco da tarde": "Motores"
   },
-  "ultimo_update_id_telegram": 999388779,
+  "ultimo_update_id_telegram": 999388780,
   "ultimo_fechamento": "2026-08-30"
 }

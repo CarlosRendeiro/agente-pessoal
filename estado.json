@@ -50,12 +50,8 @@
       "proxima_revisao": "2026-09-01"
     }
   },
-  "janela_notificada_hoje": {
-    "Bloco da tarde": "2026-08-31"
-  },
-  "sugestao_hoje": {
-    "Bloco da tarde": "Motores"
-  },
+  "janela_notificada_hoje": {},
+  "sugestao_hoje": {},
   "ultimo_update_id_telegram": 999388780,
-  "ultimo_fechamento": "2026-08-30"
+  "ultimo_fechamento": "2026-08-31"
 }

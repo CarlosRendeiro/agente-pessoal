@@ -23,7 +23,7 @@
     {"nome": "Motores Elétricos WEG",                           "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-weg-notas"},
     {"nome": "Cartografia e SIG (ArcGIS Pro, QGIS)",             "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-sig"},
     {"nome": "Banco de dados geoespacial (PostgreSQL/PostGIS)", "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "postgis-geo-queries"},
-    {"nome": "Administração Linux (Rocky Linux, Podman)",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-infra-notes"},
+    {"nome": "Administração Linux (Rocky Linux, Ubuntu)",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-infra-notes"},
     {"nome": "Python",                                          "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas"}
   ],
 

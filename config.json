@@ -1,23 +1,17 @@
 {
   "_comentario": "Edita este arquivo livremente. Horários no formato HH:MM. Dias: seg,ter,qua,qui,sex,sab,dom.",
-
   "fuso_horario": "Europe/Lisbon",
-
   "compromissos_fixos": [
     {"nome": "Kairós (estágio)", "dias": ["seg","ter","qua","qui","sex"], "inicio": "09:00", "fim": "17:00"},
     {"nome": "CTeSP (aulas)",    "dias": ["seg","ter","qua","qui","sex"], "inicio": "18:30", "fim": "23:00"}
   ],
-
   "janelas_estudo": [
     {"nome": "Bloco da tarde", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:00", "fim": "18:30"},
     {"nome": "Bloco fim de semana manhã", "dias": ["sab","dom"], "inicio": "10:00", "fim": "12:00"},
     {"nome": "Bloco fim de semana tarde", "dias": ["sab","dom"], "inicio": "15:00", "fim": "17:30"}
   ],
-
   "duracao_bloco_min": 45,
-
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
-
   "eixos_estudo": [
     {"nome": "RTIEBT",                                          "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas"},
     {"nome": "Motores Elétricos WEG",                           "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-weg-notas"},
@@ -26,14 +20,11 @@
     {"nome": "Administração Linux (Rocky Linux, Ubuntu)",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-infra-notes"},
     {"nome": "Python",                                          "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas"}
   ],
-
   "regra_never_miss_twice": {
     "ativa": true,
     "faltas_para_subir_prioridade": 2
   },
-
   "arquivo_topicos": "topicos.md",
   "arquivo_diario": "diario.md",
-
   "arquivo_estado": "estado.json"
 }

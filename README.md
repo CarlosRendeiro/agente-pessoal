@@ -36,7 +36,7 @@ A partir daqui, roda sozinho, pra sempre, sem precisar do notebook ligado.
 ```
 
 **Atenção:** como o robô só roda a cada 5 minutos, a resposta a um comando
-pode demorar até 55 min pra chegar. Não é instantâneo como um chat normal.
+pode demorar até 5 min pra chegar. Não é instantâneo como um chat normal.
 
 ## Eixos de estudo configurados (em ordem de prioridade)
 

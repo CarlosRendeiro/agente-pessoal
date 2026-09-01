@@ -2,7 +2,7 @@
 """
 Agente Pessoal — versão Telegram (roda na nuvem via GitHub Actions)
 --------------------------------------------------------------------
-Este script é chamado automaticamente pelo GitHub Actions a cada 15 minutos.
+Este script é chamado automaticamente pelo GitHub Actions a cada 5 minutos.
 Ele faz duas coisas em cada execução:
 
 1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido RTIEBT)

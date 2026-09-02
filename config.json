@@ -13,12 +13,12 @@
   "duracao_bloco_min": 45,
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
   "eixos_estudo": [
-    {"nome": "RTIEBT",       "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas",       "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"},
+    {"nome": "RTIEBT",       "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas",       "google_doc_id": "1EqWZTNllsyyuBaPkm_QJPcpHPi2X32zCRfx-BvjyabE"},
     {"nome": "Motores",      "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-notas",      "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"},
-    {"nome": "Cartografia",  "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-notas",  "google_doc_id": ""},
-    {"nome": "DBA",          "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "dba-notas",          "google_doc_id": ""},
-    {"nome": "Linux",        "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-notas",        "google_doc_id": ""},
-    {"nome": "Python",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas",       "google_doc_id": ""}
+    {"nome": "Cartografia",  "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-notas",  "google_doc_id": "1X7KFBVr5KW5VgAOReHl280sk4VzNl-j5N0kwEiMwQgU"},
+    {"nome": "DBA",          "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "dba-notas",          "google_doc_id": "1d0I55-GjAdPfq3a4d-mUGzLeHCcigZa35-cGxruYgSE"},
+    {"nome": "Linux",        "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-notas",        "google_doc_id": "1a_MNsKHxgA_WB3EGLRPSRtnHR2_uaQ_KgpNYMvpKzSE"},
+    {"nome": "Python",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas",       "google_doc_id": "1FvKYMpC_yGxVrff8Zki-TnktaPAA8eTkskh6ce16brk"}
   ],
   "regra_never_miss_twice": {
     "ativa": true,

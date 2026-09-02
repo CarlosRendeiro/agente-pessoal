@@ -13,12 +13,12 @@
   "duracao_bloco_min": 45,
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
   "eixos_estudo": [
-    {"nome": "RTIEBT",                                          "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas"},
-    {"nome": "Motores",                                         "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-notas"},
-    {"nome": "Cartografia",                                     "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-notas"},
-    {"nome": "DBA",                                             "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "dba-notas"},
-    {"nome": "Linux",                                           "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-notas"},
-    {"nome": "Python",                                          "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas"}
+    {"nome": "RTIEBT",       "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas",       "google_doc_id": ""},
+    {"nome": "Motores",      "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-notas",      "google_doc_id": ""},
+    {"nome": "Cartografia",  "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-notas",  "google_doc_id": ""},
+    {"nome": "DBA",          "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "dba-notas",          "google_doc_id": ""},
+    {"nome": "Linux",        "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-notas",        "google_doc_id": ""},
+    {"nome": "Python",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas",       "google_doc_id": ""}
   ],
   "regra_never_miss_twice": {
     "ativa": true,

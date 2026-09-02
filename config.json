@@ -13,8 +13,8 @@
   "duracao_bloco_min": 45,
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
   "eixos_estudo": [
-    {"nome": "RTIEBT",       "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas",       "google_doc_id": ""},
-    {"nome": "Motores",      "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-notas",      "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA": ""},
+    {"nome": "RTIEBT",       "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas",       "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"},
+    {"nome": "Motores",      "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-notas",      "google_doc_id": ""},
     {"nome": "Cartografia",  "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-notas",  "google_doc_id": ""},
     {"nome": "DBA",          "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "dba-notas",          "google_doc_id": ""},
     {"nome": "Linux",        "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-notas",        "google_doc_id": ""},

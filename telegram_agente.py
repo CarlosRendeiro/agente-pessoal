@@ -2,11 +2,11 @@
 """
 Agente Pessoal — versão Telegram (roda na nuvem via GitHub Actions)
 --------------------------------------------------------------------
-Este script é chamado automaticamente pelo GitHub Actions a cada 5 minutos.
+Este script é chamado automaticamente pelo GitHub Actions a cada 15 minutos.
 Ele faz duas coisas em cada execução:
 
 1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido RTIEBT)
-   e processa os comandos (com validação estrita de remetente e chat).
+   e processa os comandos.
 2. Verifica se agora é hora de um bloco de estudo e, se for, manda uma
    mensagem no Telegram avisando qual eixo estudar.
 
@@ -14,13 +14,15 @@ Toda a configuração fica em config.json. O progresso fica em estado.json,
 que é salvo de volta no repositório automaticamente pelo GitHub Actions.
 
 Comandos que tu podes mandar pro bot no Telegram:
-  /concluido NOME_DO_EIXO [nota opcional]     -> marca o bloco de hoje como feito
-  /topico NOME_DO_EIXO texto                 -> adiciona um tópico novo à lista do eixo
-  /feito NOME_DO_EIXO texto                  -> marca esse tópico como concluído
-  /topicos NOME_DO_EIXO                      -> lista os tópicos do eixo
-  /revisar                                   -> lista o que está vencido pra revisão agora
-  /status                                    -> resumo de progresso por eixo
-  /ajuda                                     -> lista os comandos
+  /concluido RTIEBT                         -> marca o bloco de hoje como feito (repetição espaçada)
+  /concluido RTIEBT fiz revisão de esquemas -> marca feito E regista a nota no diário do repositório do eixo
+  /topico RTIEBT Esquemas trifásicos        -> adiciona um tópico novo à lista do eixo
+  /feito RTIEBT Esquemas trifásicos          -> marca esse tópico como concluído
+  /topicos RTIEBT                            -> lista os tópicos (pendentes e concluídos) do eixo
+  /sincronizar RTIEBT                        -> puxa tópicos/subtópicos do Google Doc do eixo pro topicos.md
+  /revisar            -> lista o que está vencido pra revisão agora
+  /status             -> resumo de progresso por eixo
+  /ajuda              -> lista os comandos
 """
 
 import base64
@@ -31,10 +33,12 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import requests
+from google.oauth2 import service_account
+from googleapiclient.discovery import build as google_build
 
 try:
     from zoneinfo import ZoneInfo
-except ImportError:
+except ImportError:  # Python < 3.9, não deve acontecer no runner do GitHub Actions
     ZoneInfo = None
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -42,10 +46,10 @@ CONFIG_PATH = BASE_DIR / "config.json"
 
 DIAS_PT = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"]
 
-# Variáveis de ambiente e IDs autorizados
+GOOGLE_SA_JSON = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
-ALLOWED_USER_ID = os.environ.get("TELEGRAM_ALLOWED_USER_ID") or CHAT_ID
 PROGRESSO_TOKEN = os.environ.get("PROGRESSO_REPO_TOKEN")
 
 
@@ -59,13 +63,8 @@ def caminho_estado(cfg):
 
 
 def eixo_info_default():
-    return {
-        "ultima_data": None,
-        "faltas_seguidas": 0,
-        "total_blocos": 0,
-        "nivel_revisao": 0,
-        "proxima_revisao": None,
-    }
+    return {"ultima_data": None, "faltas_seguidas": 0, "total_blocos": 0,
+            "nivel_revisao": 0, "proxima_revisao": None}
 
 
 def carregar_estado(cfg):
@@ -126,17 +125,7 @@ def buscar_mensagens_novas(estado):
     return resposta.get("result", [])
 
 
-def mensagem_autorizada(msg_obj):
-    """Verifica se o remetente (user_id) e a conversa (chat_id) são os permitidos."""
-    if not msg_obj:
-        return False
-    remetente_id = str(msg_obj.get("from", {}).get("id", ""))
-    chat_id = str(msg_obj.get("chat", {}).get("id", ""))
-
-    return remetente_id == str(ALLOWED_USER_ID) and chat_id == str(CHAT_ID)
-
-
-# ---------- Lógica de repetição espaçada ----------
+# ---------- Lógica de repetição espaçada (igual à versão local) ----------
 
 def dias_atraso(hoje, proxima_str):
     if not proxima_str:
@@ -209,10 +198,8 @@ def marcar_concluido(cfg, estado, nome_eixo, hoje):
     info["total_blocos"] += 1
     info["nivel_revisao"] = nivel
     info["proxima_revisao"] = (hoje + timedelta(days=intervalos[nivel])).isoformat()
-    return (
-        f"Registado: bloco de {nome_eixo} concluído hoje. Total: {info['total_blocos']} blocos. "
-        f"Próxima revisão: {info['proxima_revisao']} (nível {nivel})."
-    )
+    return (f"Registado: bloco de {nome_eixo} concluído hoje. Total: {info['total_blocos']} blocos. "
+            f"Próxima revisão: {info['proxima_revisao']} (nível {nivel}).")
 
 
 def texto_status(cfg, estado):
@@ -249,6 +236,7 @@ TEXTO_AJUDA = (
     "/topico NOME_DO_EIXO texto — adiciona um tópico novo\n"
     "/feito NOME_DO_EIXO texto — marca esse tópico como concluído\n"
     "/topicos NOME_DO_EIXO — lista os tópicos pendentes e concluídos\n"
+    "/sincronizar NOME_DO_EIXO — puxa tópicos/subtópicos novos do Google Doc do eixo\n"
     "/revisar — o que está vencido agora\n"
     "/status — resumo de progresso\n"
     "/ajuda — esta mensagem\n"
@@ -315,10 +303,8 @@ def registrar_diario(cfg, nome_eixo, notas, hoje):
         entrada = f"\n## {hoje.isoformat()}\n"
         if notas:
             entrada += f"{notas}\n"
-        api_gravar_arquivo(
-            owner, repo, caminho, conteudo + entrada, sha,
-            f"Diário: {nome_eixo} em {hoje.isoformat()}"
-        )
+        api_gravar_arquivo(owner, repo, caminho, conteudo + entrada, sha,
+                            f"Diário: {nome_eixo} em {hoje.isoformat()}")
     except Exception as e:
         print(f"Erro ao registar diário de {nome_eixo}: {e}")
 
@@ -335,10 +321,8 @@ def adicionar_topico(cfg, nome_eixo, topico_texto):
         if conteudo is None:
             conteudo = f"# Tópicos — {nome_eixo}\n\n"
         novo_conteudo = conteudo.rstrip("\n") + f"\n- [ ] {topico_texto}\n"
-        api_gravar_arquivo(
-            owner, repo, caminho, novo_conteudo, sha,
-            f"Novo tópico em {nome_eixo}: {topico_texto}"
-        )
+        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha,
+                            f"Novo tópico em {nome_eixo}: {topico_texto}")
         return f"Tópico adicionado em {nome_eixo}: {topico_texto}"
     except Exception as e:
         return f"Erro ao adicionar tópico: {e}"
@@ -364,10 +348,8 @@ def marcar_topico_concluido(cfg, nome_eixo, topico_texto):
                 break
         if not encontrado:
             return f"Não encontrei um tópico pendente parecido com '{topico_texto}' em {nome_eixo}."
-        api_gravar_arquivo(
-            owner, repo, caminho, "\n".join(linhas), sha,
-            f"Tópico concluído em {nome_eixo}: {topico_texto}"
-        )
+        api_gravar_arquivo(owner, repo, caminho, "\n".join(linhas), sha,
+                            f"Tópico concluído em {nome_eixo}: {topico_texto}")
         return f"Marcado como concluído em {nome_eixo}: {topico_texto}"
     except Exception as e:
         return f"Erro ao marcar tópico: {e}"
@@ -407,6 +389,188 @@ def separar_eixo_e_notas(texto_apos_comando, nomes_validos):
     return nome, notas
 
 
+# ---------- Google Docs: extrair tópicos/subtópicos por estilo de título ----------
+
+def obter_servico_docs():
+    if not GOOGLE_SA_JSON:
+        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON não configurado.")
+    info = json.loads(GOOGLE_SA_JSON)
+    creds = service_account.Credentials.from_service_account_info(
+        info, scopes=["https://www.googleapis.com/auth/documents.readonly"]
+    )
+    return google_build("docs", "v1", credentials=creds)
+
+
+def texto_do_paragrafo(paragraph):
+    partes = []
+    for elemento in paragraph.get("elements", []):
+        run = elemento.get("textRun")
+        if run:
+            partes.append(run.get("content", ""))
+    return "".join(partes).strip()
+
+
+def extrair_estrutura_do_doc(doc_id):
+    """Lê o Google Doc e retorna uma lista de tópicos na ordem em que aparecem:
+    [{"topico": "1. Motor Elétrico",
+      "subtopicos": [{"subtopico": "Potência", "subsubtopicos": ["Pu", "Pa"]}, ...]}, ...]
+    Só considera parágrafos com estilo Heading 1 (tópico), Heading 2 (subtópico)
+    e Heading 3 (sub-subtópico); todo o resto do texto (definições, corpo do
+    documento) é ignorado. Um Heading 3 sem um Heading 2 antes dele (dentro do
+    mesmo tópico) é ignorado, pois não tem onde encaixar na hierarquia."""
+    servico = obter_servico_docs()
+    doc = servico.documents().get(documentId=doc_id).execute()
+
+    estrutura = []
+    topico_atual = None
+    subtopico_atual = None
+    for elemento in doc.get("body", {}).get("content", []):
+        paragrafo = elemento.get("paragraph")
+        if not paragrafo:
+            continue
+        estilo = paragrafo.get("paragraphStyle", {}).get("namedStyleType", "")
+        texto = texto_do_paragrafo(paragrafo)
+        if not texto:
+            continue
+
+        if estilo == "HEADING_1":
+            topico_atual = {"topico": texto, "subtopicos": []}
+            estrutura.append(topico_atual)
+            subtopico_atual = None
+        elif estilo == "HEADING_2" and topico_atual is not None:
+            subtopico_atual = {"subtopico": texto, "subsubtopicos": []}
+            topico_atual["subtopicos"].append(subtopico_atual)
+        elif estilo == "HEADING_3" and subtopico_atual is not None:
+            subtopico_atual["subsubtopicos"].append(texto)
+        # qualquer outro estilo (texto normal, bullets de definição, etc.) é ignorado
+
+    return estrutura
+
+
+def parsear_topicos_md(conteudo):
+    """Lê o conteúdo atual de topicos.md e devolve (cabecalho, arvore_de_topicos).
+    Cada nó é {"texto":..., "feito": bool, "subs": [nó, nó, ...]}, com profundidade
+    ilimitada — o nível é determinado pela indentação (2 espaços por nível)."""
+    linhas = conteudo.split("\n") if conteudo else []
+    cabecalho = []
+    raiz = []
+    pilha = []  # [(nivel, node), ...] dos nós ainda "abertos"
+    dentro_da_lista = False
+
+    for linha in linhas:
+        semi = linha.strip()
+        if semi.startswith("- [ ]") or semi.startswith("- [x]"):
+            dentro_da_lista = True
+            feito = semi.startswith("- [x]")
+            texto = semi[5:].strip()
+            indent = len(linha) - len(linha.lstrip(" \t"))
+            nivel = indent // 2
+            node = {"texto": texto, "feito": feito, "subs": []}
+            while pilha and pilha[-1][0] >= nivel:
+                pilha.pop()
+            if pilha:
+                pilha[-1][1]["subs"].append(node)
+            else:
+                raiz.append(node)
+            pilha.append((nivel, node))
+        elif not dentro_da_lista:
+            cabecalho.append(linha)
+        # linhas em branco dentro da lista são só ignoradas na reconstrução
+
+    return "\n".join(cabecalho).rstrip("\n"), raiz
+
+
+def montar_topicos_md(cabecalho, topicos):
+    linhas = [cabecalho.rstrip("\n"), ""]
+
+    def escrever(nodes, nivel):
+        for n in nodes:
+            marca = "x" if n["feito"] else " "
+            linhas.append("  " * nivel + f"- [{marca}] {n['texto']}")
+            escrever(n["subs"], nivel + 1)
+
+    escrever(topicos, 0)
+    return "\n".join(linhas).rstrip("\n") + "\n"
+
+
+def mesclar_estrutura_no_topicos_md(conteudo_atual, nome_eixo, estrutura_doc):
+    """Junta a estrutura vinda do Google Doc (até 3 níveis: tópico, subtópico,
+    sub-subtópico) com o topicos.md existente, só ADICIONANDO o que ainda não
+    existe (por texto exato em cada nível), sem nunca desmarcar ou remover o
+    que já está lá. Retorna (novo_conteudo, resumo)."""
+    if conteudo_atual is None:
+        cabecalho = f"# Tópicos — {nome_eixo}"
+        topicos = []
+    else:
+        cabecalho, topicos = parsear_topicos_md(conteudo_atual)
+        if not cabecalho:
+            cabecalho = f"# Tópicos — {nome_eixo}"
+
+    contadores = {"topicos": 0, "subtopicos": 0, "subsubtopicos": 0}
+
+    def encontrar_ou_criar(lista_nodes, texto):
+        for n in lista_nodes:
+            if n["texto"] == texto:
+                return n, False
+        novo = {"texto": texto, "feito": False, "subs": []}
+        lista_nodes.append(novo)
+        return novo, True
+
+    for item in estrutura_doc:
+        node_topico, criado = encontrar_ou_criar(topicos, item["topico"])
+        if criado:
+            contadores["topicos"] += 1
+        for sub in item.get("subtopicos", []):
+            node_sub, criado_sub = encontrar_ou_criar(node_topico["subs"], sub["subtopico"])
+            if criado_sub:
+                contadores["subtopicos"] += 1
+            for nome_subsub in sub.get("subsubtopicos", []):
+                _, criado_subsub = encontrar_ou_criar(node_sub["subs"], nome_subsub)
+                if criado_subsub:
+                    contadores["subsubtopicos"] += 1
+
+    novo_conteudo = montar_topicos_md(cabecalho, topicos)
+    resumo = (f"{contadores['topicos']} tópico(s), {contadores['subtopicos']} subtópico(s) e "
+              f"{contadores['subsubtopicos']} sub-subtópico(s) novo(s)")
+    return novo_conteudo, resumo
+
+
+def sincronizar_topicos_do_doc(cfg, nome_eixo):
+    owner, repo = repo_do_eixo(cfg, nome_eixo)
+    if not owner:
+        return f"O eixo {nome_eixo} não tem repositório configurado."
+    if not PROGRESSO_TOKEN:
+        return "PROGRESSO_REPO_TOKEN não configurado — não consigo gravar no GitHub agora."
+
+    doc_id = None
+    for eixo in cfg["eixos_estudo"]:
+        if eixo["nome"] == nome_eixo:
+            doc_id = eixo.get("google_doc_id")
+    if not doc_id:
+        return f"O eixo {nome_eixo} ainda não tem google_doc_id configurado em config.json."
+
+    try:
+        estrutura = extrair_estrutura_do_doc(doc_id)
+    except Exception as e:
+        return f"Erro ao ler o Google Doc de {nome_eixo}: {e}"
+
+    if not estrutura:
+        return (f"Não encontrei nenhum título Heading 1 no doc de {nome_eixo}. "
+                f"Confere se os tópicos estão marcados com o estilo 'Título 1' e os subtópicos com 'Título 2'.")
+
+    caminho = cfg.get("arquivo_topicos", "topicos.md")
+    try:
+        conteudo_atual, sha = api_ler_arquivo(owner, repo, caminho)
+        novo_conteudo, resumo = mesclar_estrutura_no_topicos_md(conteudo_atual, nome_eixo, estrutura)
+        if novo_conteudo == conteudo_atual:
+            return f"Sincronizado com {nome_eixo}: nada novo (já estava tudo atualizado)."
+        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha,
+                            f"Sincronização com Google Doc: {nome_eixo}")
+        return f"Sincronizado com {nome_eixo}: {resumo}."
+    except Exception as e:
+        return f"Erro ao gravar tópicos sincronizados de {nome_eixo}: {e}"
+
+
 # ---------- Processamento das mensagens recebidas ----------
 
 def processar_mensagens(cfg, estado, hoje):
@@ -415,21 +579,18 @@ def processar_mensagens(cfg, estado, hoje):
         update_id = msg["update_id"]
         estado["ultimo_update_id_telegram"] = max(estado.get("ultimo_update_id_telegram", 0), update_id)
 
-        msg_obj = msg.get("message") or msg.get("edited_message")
-        if not msg_obj:
-            continue
+        mensagem = msg.get("message", {}) or {}
+        texto = mensagem.get("text", "").strip()
+        remetente_chat_id = str(mensagem.get("chat", {}).get("id", ""))
 
-        # --- TRAVA DE SEGURANÇA: REMETENTE E CHAT ---
-        if not mensagem_autorizada(msg_obj):
-            sender_id = msg_obj.get("from", {}).get("id")
-            sender_user = msg_obj.get("from", {}).get("username")
-            chat_id = msg_obj.get("chat", {}).get("id")
-            print(f"⚠️ Acesso bloqueado: @{sender_user} (User ID: {sender_id} | Chat ID: {chat_id})")
-            continue
-        # ---------------------------------------------
-
-        texto = msg_obj.get("text", "").strip()
         if not texto:
+            continue
+
+        # Segurança: ignora qualquer mensagem que não venha do teu chat.
+        # Isso garante que, mesmo que alguém descubra o username do bot,
+        # não consiga executar comandos nem ler nenhuma resposta.
+        if not CHAT_ID or remetente_chat_id != str(CHAT_ID):
+            print(f"Mensagem ignorada de chat não autorizado: {remetente_chat_id}")
             continue
 
         if texto.startswith("/concluido"):
@@ -487,6 +648,18 @@ def processar_mensagens(cfg, estado, hoje):
                 enviar_mensagem("Falta o texto do tópico. Ex: /feito RTIEBT Esquemas trifásicos")
                 continue
             enviar_mensagem(marcar_topico_concluido(cfg, nome_eixo, topico_texto))
+
+        elif texto.startswith("/sincronizar"):
+            partes = texto.split(maxsplit=1)
+            nomes_validos = [e["nome"] for e in cfg["eixos_estudo"]]
+            if len(partes) < 2:
+                enviar_mensagem(f"Uso: /sincronizar NOME_DO_EIXO. Eixos válidos: {', '.join(nomes_validos)}")
+                continue
+            nome_eixo, _resto = separar_eixo_e_notas(partes[1], nomes_validos)
+            if nome_eixo is None:
+                enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
+                continue
+            enviar_mensagem(sincronizar_topicos_do_doc(cfg, nome_eixo))
 
         elif texto.startswith("/revisar"):
             enviar_mensagem(texto_revisar(cfg, estado, hoje))
@@ -581,4 +754,3 @@ if __name__ == "__main__":
         cmd_check()
     else:
         print(__doc__)
-       

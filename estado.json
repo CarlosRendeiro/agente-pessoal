@@ -1,34 +1,34 @@
 {
   "eixos": {
     "RTIEBT": {
-      "ultima_data": "2026-09-02",
-      "faltas_seguidas": 0,
-      "total_blocos": 2,
-      "nivel_revisao": 0,
-      "proxima_revisao": "2026-09-03"
-    },
-    "Motores Elétricos WEG": {
-      "ultima_data": "2026-08-31",
-      "faltas_seguidas": 0,
-      "total_blocos": 4,
-      "nivel_revisao": 3,
-      "proxima_revisao": "2026-09-07"
-    },
-    "Cartografia e SIG (ArcGIS/QGIS)": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "PostgreSQL/PostGIS": {
+    "Motores": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Administração Linux (Rocky/Podman)": {
+    "Cartografia": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "DBA": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
+    "Linux": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
@@ -41,17 +41,10 @@
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
-    },
-    "Motores": {
-      "ultima_data": "2026-09-02",
-      "faltas_seguidas": 0,
-      "total_blocos": 2,
-      "nivel_revisao": 1,
-      "proxima_revisao": "2026-09-04"
     }
   },
   "janela_notificada_hoje": {},
   "sugestao_hoje": {},
-  "ultimo_update_id_telegram": 999388804,
-  "ultimo_fechamento": "2026-09-02"
+  "ultimo_update_id_telegram": 999388805,
+  "ultimo_fechamento": null
 }

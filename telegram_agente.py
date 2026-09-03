@@ -20,6 +20,7 @@ Comandos que tu podes mandar pro bot no Telegram:
   /feito RTIEBT Esquemas trifásicos          -> marca esse tópico como concluído
   /topicos RTIEBT                            -> lista os tópicos (pendentes e concluídos) do eixo
   /sincronizar RTIEBT                        -> puxa tópicos/subtópicos do Google Doc do eixo pro topicos.md
+  /sincronizartudo                           -> faz isso pra todos os eixos que já têm google_doc_id configurado
   /revisar            -> lista o que está vencido pra revisão agora
   /status             -> resumo de progresso por eixo
   /ajuda              -> lista os comandos
@@ -237,6 +238,7 @@ TEXTO_AJUDA = (
     "/feito NOME_DO_EIXO texto — marca esse tópico como concluído\n"
     "/topicos NOME_DO_EIXO — lista os tópicos pendentes e concluídos\n"
     "/sincronizar NOME_DO_EIXO — puxa tópicos/subtópicos novos do Google Doc do eixo\n"
+    "/sincronizartudo — faz isso pra todos os eixos com google_doc_id configurado\n"
     "/revisar — o que está vencido agora\n"
     "/status — resumo de progresso\n"
     "/ajuda — esta mensagem\n"
@@ -571,6 +573,28 @@ def sincronizar_topicos_do_doc(cfg, nome_eixo):
         return f"Erro ao gravar tópicos sincronizados de {nome_eixo}: {e}"
 
 
+def sincronizar_todos_os_eixos(cfg):
+    """Roda a sincronização do Google Doc pra todo eixo que tiver google_doc_id
+    preenchido, pulando os demais. Retorna um texto-resumo único."""
+    linhas = ["Sincronização de todos os eixos:"]
+    algum_configurado = False
+    for eixo in cfg["eixos_estudo"]:
+        nome = eixo["nome"]
+        if not eixo.get("google_doc_id"):
+            linhas.append(f"- {nome}: sem google_doc_id configurado, pulei")
+            continue
+        algum_configurado = True
+        try:
+            resultado = sincronizar_topicos_do_doc(cfg, nome)
+        except Exception as e:
+            resultado = f"erro: {e}"
+        linhas.append(f"- {nome}: {resultado}")
+
+    if not algum_configurado:
+        return "Nenhum eixo tem google_doc_id configurado ainda em config.json."
+    return "\n".join(linhas)
+
+
 # ---------- Processamento das mensagens recebidas ----------
 
 def processar_mensagens(cfg, estado, hoje):
@@ -648,6 +672,9 @@ def processar_mensagens(cfg, estado, hoje):
                 enviar_mensagem("Falta o texto do tópico. Ex: /feito RTIEBT Esquemas trifásicos")
                 continue
             enviar_mensagem(marcar_topico_concluido(cfg, nome_eixo, topico_texto))
+
+        elif texto.startswith("/sincronizartudo"):
+            enviar_mensagem(sincronizar_todos_os_eixos(cfg))
 
         elif texto.startswith("/sincronizar"):
             partes = texto.split(maxsplit=1)

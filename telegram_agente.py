@@ -239,6 +239,7 @@ TEXTO_AJUDA = (
     "/topicos NOME_DO_EIXO — lista os tópicos pendentes e concluídos\n"
     "/sincronizar NOME_DO_EIXO — puxa tópicos/subtópicos novos do Google Doc do eixo\n"
     "/sincronizartudo — faz isso pra todos os eixos com google_doc_id configurado\n"
+    "/reiniciartudo CONFIRMAR — zera repetição espaçada, tópicos e diários de TODOS os eixos (irreversível)\n"
     "/revisar — o que está vencido agora\n"
     "/status — resumo de progresso\n"
     "/ajuda — esta mensagem\n"
@@ -595,6 +596,73 @@ def sincronizar_todos_os_eixos(cfg):
     return "\n".join(linhas)
 
 
+# ---------- Reinício completo (repetição espaçada + tópicos + diários) ----------
+
+def reiniciar_estado_estudo(cfg, estado):
+    """Zera o progresso de repetição espaçada de todos os eixos, mantendo o
+    offset do Telegram intacto (pra não reprocessar mensagens antigas)."""
+    estado["eixos"] = {e["nome"]: eixo_info_default() for e in cfg["eixos_estudo"]}
+    estado["janela_notificada_hoje"] = {}
+    estado["sugestao_hoje"] = {}
+    estado["ultimo_fechamento"] = None
+
+
+def desmarcar_todos_recursivo(nodes):
+    for n in nodes:
+        n["feito"] = False
+        desmarcar_todos_recursivo(n["subs"])
+
+
+def reiniciar_topicos_e_diario_do_eixo(cfg, nome_eixo):
+    """Desmarca todos os tópicos (sem apagar a lista) e limpa o diario.md,
+    voltando só ao título. Retorna uma mensagem de status."""
+    owner, repo = repo_do_eixo(cfg, nome_eixo)
+    if not owner:
+        return f"{nome_eixo}: sem repositório configurado, pulei"
+    if not PROGRESSO_TOKEN:
+        return f"{nome_eixo}: PROGRESSO_REPO_TOKEN não configurado"
+
+    caminho_topicos = cfg.get("arquivo_topicos", "topicos.md")
+    caminho_diario = cfg.get("arquivo_diario", "diario.md")
+    partes_msg = []
+
+    try:
+        conteudo_topicos, sha_topicos = api_ler_arquivo(owner, repo, caminho_topicos)
+        if conteudo_topicos is not None:
+            cabecalho, topicos = parsear_topicos_md(conteudo_topicos)
+            desmarcar_todos_recursivo(topicos)
+            novo_conteudo = montar_topicos_md(cabecalho or f"# Tópicos — {nome_eixo}", topicos)
+            if novo_conteudo != conteudo_topicos:
+                api_gravar_arquivo(owner, repo, caminho_topicos, novo_conteudo, sha_topicos,
+                                    f"Reinício: tópicos desmarcados em {nome_eixo}")
+            partes_msg.append("tópicos desmarcados")
+        else:
+            partes_msg.append("sem topicos.md ainda")
+    except Exception as e:
+        partes_msg.append(f"erro nos tópicos ({e})")
+
+    try:
+        _conteudo_diario, sha_diario = api_ler_arquivo(owner, repo, caminho_diario)
+        novo_diario = f"# Diário de progresso — {nome_eixo}\n"
+        api_gravar_arquivo(owner, repo, caminho_diario, novo_diario, sha_diario,
+                            f"Reinício: diário zerado em {nome_eixo}")
+        partes_msg.append("diário zerado")
+    except Exception as e:
+        partes_msg.append(f"erro no diário ({e})")
+
+    return f"{nome_eixo}: " + ", ".join(partes_msg)
+
+
+def reiniciar_tudo(cfg, estado):
+    reiniciar_estado_estudo(cfg, estado)
+    linhas = ["Reinício completo:"]
+    for eixo in cfg["eixos_estudo"]:
+        linhas.append("- " + reiniciar_topicos_e_diario_do_eixo(cfg, eixo["nome"]))
+    linhas.append("")
+    linhas.append("Repetição espaçada zerada pra todos os eixos. A partir de agora, é como começar do zero.")
+    return "\n".join(linhas)
+
+
 # ---------- Processamento das mensagens recebidas ----------
 
 def processar_mensagens(cfg, estado, hoje):
@@ -672,6 +740,18 @@ def processar_mensagens(cfg, estado, hoje):
                 enviar_mensagem("Falta o texto do tópico. Ex: /feito RTIEBT Esquemas trifásicos")
                 continue
             enviar_mensagem(marcar_topico_concluido(cfg, nome_eixo, topico_texto))
+
+        elif texto.startswith("/reiniciartudo"):
+            partes = texto.split(maxsplit=1)
+            if len(partes) < 2 or partes[1].strip().upper() != "CONFIRMAR":
+                enviar_mensagem(
+                    "⚠️ Isso vai zerar TODA a repetição espaçada, desmarcar todos os tópicos "
+                    "concluídos e apagar todos os diários de progresso, em todos os eixos. "
+                    "Não tem como desfazer.\n\n"
+                    "Se tens certeza, manda: /reiniciartudo CONFIRMAR"
+                )
+                continue
+            enviar_mensagem(reiniciar_tudo(cfg, estado))
 
         elif texto.startswith("/sincronizartudo"):
             enviar_mensagem(sincronizar_todos_os_eixos(cfg))

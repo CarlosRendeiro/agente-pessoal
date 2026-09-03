@@ -1,11 +1,11 @@
 {
   "eixos": {
     "RTIEBT": {
-      "ultima_data": null,
+      "ultima_data": "2026-09-03",
       "faltas_seguidas": 0,
-      "total_blocos": 0,
+      "total_blocos": 1,
       "nivel_revisao": 0,
-      "proxima_revisao": null
+      "proxima_revisao": "2026-09-04"
     },
     "Motores": {
       "ultima_data": null,
@@ -49,6 +49,6 @@
   "sugestao_hoje": {
     "Bloco da tarde": "RTIEBT"
   },
-  "ultimo_update_id_telegram": 999388817,
+  "ultimo_update_id_telegram": 999388819,
   "ultimo_fechamento": null
 }

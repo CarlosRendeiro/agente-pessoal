@@ -43,8 +43,12 @@
       "proxima_revisao": null
     }
   },
-  "janela_notificada_hoje": {},
-  "sugestao_hoje": {},
+  "janela_notificada_hoje": {
+    "Bloco da tarde": "2026-09-04"
+  },
+  "sugestao_hoje": {
+    "Bloco da tarde": "Motores"
+  },
   "ultimo_update_id_telegram": 999388819,
   "ultimo_fechamento": "2026-09-03"
 }

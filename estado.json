@@ -44,10 +44,12 @@
     }
   },
   "janela_notificada_hoje": {
-    "Bloco fim de semana manhã": "2026-09-05"
+    "Bloco fim de semana manhã": "2026-09-05",
+    "Bloco fim de semana tarde": "2026-09-05"
   },
   "sugestao_hoje": {
-    "Bloco fim de semana manhã": "Motores"
+    "Bloco fim de semana manhã": "Motores",
+    "Bloco fim de semana tarde": "Motores"
   },
   "ultimo_update_id_telegram": 999388819,
   "ultimo_fechamento": "2026-09-04"

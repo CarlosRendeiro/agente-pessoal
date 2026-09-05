@@ -8,11 +8,11 @@
       "proxima_revisao": "2026-09-04"
     },
     "Motores": {
-      "ultima_data": null,
-      "faltas_seguidas": 1,
-      "total_blocos": 0,
-      "nivel_revisao": 0,
-      "proxima_revisao": null
+      "ultima_data": "2026-09-05",
+      "faltas_seguidas": 0,
+      "total_blocos": 3,
+      "nivel_revisao": 2,
+      "proxima_revisao": "2026-09-09"
     },
     "Cartografia": {
       "ultima_data": null,
@@ -51,6 +51,6 @@
     "Bloco fim de semana manhã": "Motores",
     "Bloco fim de semana tarde": "Motores"
   },
-  "ultimo_update_id_telegram": 999388819,
+  "ultimo_update_id_telegram": 999388822,
   "ultimo_fechamento": "2026-09-04"
 }

@@ -1,18 +1,18 @@
 {
   "eixos": {
     "RTIEBT": {
-      "ultima_data": "2026-09-03",
-      "faltas_seguidas": 4,
-      "total_blocos": 1,
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
       "nivel_revisao": 0,
-      "proxima_revisao": "2026-09-04"
+      "proxima_revisao": null
     },
     "Motores": {
-      "ultima_data": "2026-09-05",
+      "ultima_data": null,
       "faltas_seguidas": 0,
-      "total_blocos": 3,
-      "nivel_revisao": 2,
-      "proxima_revisao": "2026-09-09"
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
     },
     "Cartografia": {
       "ultima_data": null,
@@ -45,6 +45,6 @@
   },
   "janela_notificada_hoje": {},
   "sugestao_hoje": {},
-  "ultimo_update_id_telegram": 999388822,
-  "ultimo_fechamento": "2026-09-08"
+  "ultimo_update_id_telegram": 999388823,
+  "ultimo_fechamento": null
 }

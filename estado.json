@@ -9,7 +9,7 @@
     },
     "Motores": {
       "ultima_data": null,
-      "faltas_seguidas": 1,
+      "faltas_seguidas": 2,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
@@ -43,12 +43,8 @@
       "proxima_revisao": null
     }
   },
-  "janela_notificada_hoje": {
-    "Bloco da tarde": "2026-09-11"
-  },
-  "sugestao_hoje": {
-    "Bloco da tarde": "Motores"
-  },
+  "janela_notificada_hoje": {},
+  "sugestao_hoje": {},
   "ultimo_update_id_telegram": 999388828,
-  "ultimo_fechamento": "2026-09-10"
+  "ultimo_fechamento": "2026-09-11"
 }

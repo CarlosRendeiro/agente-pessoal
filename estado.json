@@ -9,7 +9,7 @@
     },
     "Motores": {
       "ultima_data": null,
-      "faltas_seguidas": 2,
+      "faltas_seguidas": 4,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
@@ -43,14 +43,8 @@
       "proxima_revisao": null
     }
   },
-  "janela_notificada_hoje": {
-    "Bloco fim de semana manhã": "2026-09-12",
-    "Bloco fim de semana tarde": "2026-09-12"
-  },
-  "sugestao_hoje": {
-    "Bloco fim de semana manhã": "Motores",
-    "Bloco fim de semana tarde": "Motores"
-  },
+  "janela_notificada_hoje": {},
+  "sugestao_hoje": {},
   "ultimo_update_id_telegram": 999388829,
-  "ultimo_fechamento": "2026-09-11"
+  "ultimo_fechamento": "2026-09-12"
 }

@@ -1,15 +1,15 @@
 {
   "eixos": {
     "RTIEBT": {
-      "ultima_data": "2026-09-10",
+      "ultima_data": null,
       "faltas_seguidas": 0,
-      "total_blocos": 1,
+      "total_blocos": 0,
       "nivel_revisao": 0,
-      "proxima_revisao": "2026-09-11"
+      "proxima_revisao": null
     },
     "Motores": {
       "ultima_data": null,
-      "faltas_seguidas": 4,
+      "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
@@ -47,8 +47,8 @@
     "Bloco fim de semana manhã": "2026-09-13"
   },
   "sugestao_hoje": {
-    "Bloco fim de semana manhã": "Motores"
+    "Bloco fim de semana manhã": "RTIEBT"
   },
-  "ultimo_update_id_telegram": 999388829,
-  "ultimo_fechamento": "2026-09-12"
+  "ultimo_update_id_telegram": 999388830,
+  "ultimo_fechamento": null
 }

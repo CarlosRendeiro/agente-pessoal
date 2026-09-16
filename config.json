@@ -1,59 +1,59 @@
 {
-  "_comentario": "Configuração alinhada com as UCs do CTeSP, novos nomes de repositórios no GitHub e regras de proteção biológica.",
+  "_comentario": "Configuracao com nomes simples e sem espacos nos eixos de estudo.",
   "fuso_horario": "Europe/Lisbon",
   "compromissos_fixos": [
-    {"nome": "Treino & Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "06:00", "fim": "08:20"},
-    {"nome": "Estágio EFA (Kairós)", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:30", "fim": "17:30"},
-    {"nome": "CTeSP - Moodle / Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "22:15"}
+    {"nome": "Treino_Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "06:00", "fim": "08:20"},
+    {"nome": "Estagio_EFA", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:30", "fim": "17:30"},
+    {"nome": "CTeSP_Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "22:15"}
   ],
   "janelas_estudo": [
-    {"nome": "Transição & Lanche", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
-    {"nome": "Bloco Quinta (Revisão Leve)", "dias": ["qui"], "inicio": "18:30", "fim": "19:45"},
-    {"nome": "Bloco Sábado Manhã (Foco Único)", "dias": ["sab"], "inicio": "09:30", "fim": "12:15"}
+    {"nome": "Lanche", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
+    {"nome": "Quinta_Leve", "dias": ["qui"], "inicio": "18:30", "fim": "19:45"},
+    {"nome": "Sabado_Manha", "dias": ["sab"], "inicio": "09:30", "fim": "12:15"}
   ],
   "duracao_bloco_min": 45,
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
   "eixos_estudo": [
     {
-      "nome": "Eletrotecnia (E)",
+      "nome": "Eletrotecnia",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "eletrotecnia-notas",
+      "repo_nome": "rtiebt-notas",
       "google_doc_id": "1EqWZTNllsyyuBaPkm_QJPcpHPi2X32zCRfx-BvjyabE"
     },
     {
-      "nome": "Elementos de Física e Química (EFQ)",
+      "nome": "EFQ",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "efq-notas",
+      "repo_nome": "motores-notas",
       "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"
     },
     {
-      "nome": "Tópicos de Matemática (TM)",
+      "nome": "TM",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "tm-notas",
+      "repo_nome": "python-notas",
       "google_doc_id": "1FvKYMpC_yGxVrff8Zki-TnktaPAA8eTkskh6ce16brk"
     },
     {
-      "nome": "Desenho Assistido (DACIE)",
+      "nome": "DACIE",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "dacie-notas",
+      "repo_nome": "cartografia-notas",
       "google_doc_id": "1X7KFBVr5KW5VgAOReHl280sk4VzNl-j5N0kwEiMwQgU"
     },
     {
-      "nome": "Inglês Técnico",
+      "nome": "Ingles",
       "peso": 1,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "ingles-tecnico-notas",
+      "repo_nome": "linux-notas",
       "google_doc_id": "1a_MNsKHxgA_WB3EGLRPSRtnHR2_uaQ_KgpNYMvpKzSE"
     },
     {
-      "nome": "PostGIS / Linux",
+      "nome": "PostGIS",
       "peso": 1,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "postgis-linux-notas",
+      "repo_nome": "dba-notas",
       "google_doc_id": "1d0I55-GjAdPfq3a4d-mUGzLeHCcigZa35-cGxruYgSE"
     }
   ],

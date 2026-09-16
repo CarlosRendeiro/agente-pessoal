@@ -1,41 +1,41 @@
 {
   "eixos": {
-    "Eletrotecnia (E)": {
+    "Eletrotecnia": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Elementos de Física e Química (EFQ)": {
+    "EFQ": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Tópicos de Matemática (TM)": {
+    "TM": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Desenho Assistido (DACIE)": {
+    "DACIE": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Inglês Técnico": {
+    "Ingles": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "PostGIS / Linux": {
+    "PostGIS": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,

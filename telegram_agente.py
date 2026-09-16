@@ -5,7 +5,7 @@ Agente Pessoal — versão Telegram (roda na nuvem via GitHub Actions)
 Este script é chamado automaticamente pelo GitHub Actions a cada 15 minutos.
 Ele faz duas coisas em cada execução:
 
-1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido RTIEBT)
+1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido Eletrotecnia)
    e processa os comandos.
 2. Verifica se agora é hora de um bloco de estudo e, se for, manda uma
    mensagem no Telegram avisando qual eixo estudar.
@@ -14,16 +14,16 @@ Toda a configuração fica em config.json. O progresso fica em estado.json,
 que é salvo de volta no repositório automaticamente pelo GitHub Actions.
 
 Comandos que tu podes mandar pro bot no Telegram:
-  /concluido RTIEBT                         -> marca o bloco de hoje como feito (repetição espaçada)
-  /concluido RTIEBT fiz revisão de esquemas -> marca feito E regista a nota no diário do repositório do eixo
-  /topico RTIEBT Esquemas trifásicos        -> adiciona um tópico novo à lista do eixo
-  /feito RTIEBT Esquemas trifásicos          -> marca esse tópico como concluído
-  /topicos RTIEBT                            -> lista os tópicos (pendentes e concluídos) do eixo
-  /sincronizar RTIEBT                        -> puxa tópicos/subtópicos do Google Doc do eixo pro topicos.md
-  /sincronizartudo                           -> faz isso pra todos os eixos que já têm google_doc_id configurado
-  /revisar            -> lista o que está vencido pra revisão agora
-  /status             -> resumo de progresso por eixo
-  /ajuda              -> lista os comandos
+  /concluido Eletrotecnia                         -> marca o bloco de hoje como feito (repetição espaçada)
+  /concluido Eletrotecnia fiz revisão de esquemas -> marca feito E regista a nota no diário do repositório do eixo
+  /topico Eletrotecnia Esquemas trifásicos        -> adiciona um tópico novo à lista do eixo
+  /feito Eletrotecnia Esquemas trifásicos          -> marca esse tópico como concluído
+  /topicos Eletrotecnia                            -> lista os tópicos (pendentes e concluídos) do eixo
+  /sincronizar Eletrotecnia                        -> puxa tópicos/subtópicos do Google Doc do eixo pro topicos.md
+  /sincronizartudo                                -> faz isso pra todos os eixos que já têm google_doc_id configurado
+  /revisar             -> lista o que está vencido pra revisão agora
+  /status              -> resumo de progresso por eixo
+  /ajuda               -> lista os comandos
 """
 
 import base64
@@ -126,7 +126,7 @@ def buscar_mensagens_novas(estado):
     return resposta.get("result", [])
 
 
-# ---------- Lógica de repetição espaçada (igual à versão local) ----------
+# ---------- Lógica de repetição espaçada ----------
 
 def dias_atraso(hoje, proxima_str):
     if not proxima_str:
@@ -380,9 +380,6 @@ def listar_topicos(cfg, nome_eixo):
 
 
 def separar_eixo_e_notas(texto_apos_comando, nomes_validos):
-    """Reconhece o eixo mesmo com nome composto (ex: 'Motores Elétricos WEG'),
-    pegando o nome válido mais longo que bate no início do texto, e trata
-    o resto como nota/tópico."""
     texto_apos_comando = texto_apos_comando.strip()
     candidatos = [n for n in nomes_validos if texto_apos_comando == n or texto_apos_comando.startswith(n + " ")]
     if not candidatos:
@@ -392,7 +389,7 @@ def separar_eixo_e_notas(texto_apos_comando, nomes_validos):
     return nome, notas
 
 
-# ---------- Google Docs: extrair tópicos/subtópicos por estilo de título ----------
+# ---------- Google Docs ----------
 
 def obter_servico_docs():
     if not GOOGLE_SA_JSON:
@@ -414,13 +411,6 @@ def texto_do_paragrafo(paragraph):
 
 
 def extrair_estrutura_do_doc(doc_id):
-    """Lê o Google Doc e retorna uma lista de tópicos na ordem em que aparecem:
-    [{"topico": "1. Motor Elétrico",
-      "subtopicos": [{"subtopico": "Potência", "subsubtopicos": ["Pu", "Pa"]}, ...]}, ...]
-    Só considera parágrafos com estilo Heading 1 (tópico), Heading 2 (subtópico)
-    e Heading 3 (sub-subtópico); todo o resto do texto (definições, corpo do
-    documento) é ignorado. Um Heading 3 sem um Heading 2 antes dele (dentro do
-    mesmo tópico) é ignorado, pois não tem onde encaixar na hierarquia."""
     servico = obter_servico_docs()
     doc = servico.documents().get(documentId=doc_id).execute()
 
@@ -445,19 +435,15 @@ def extrair_estrutura_do_doc(doc_id):
             topico_atual["subtopicos"].append(subtopico_atual)
         elif estilo == "HEADING_3" and subtopico_atual is not None:
             subtopico_atual["subsubtopicos"].append(texto)
-        # qualquer outro estilo (texto normal, bullets de definição, etc.) é ignorado
 
     return estrutura
 
 
 def parsear_topicos_md(conteudo):
-    """Lê o conteúdo atual de topicos.md e devolve (cabecalho, arvore_de_topicos).
-    Cada nó é {"texto":..., "feito": bool, "subs": [nó, nó, ...]}, com profundidade
-    ilimitada — o nível é determinado pela indentação (2 espaços por nível)."""
     linhas = conteudo.split("\n") if conteudo else []
     cabecalho = []
     raiz = []
-    pilha = []  # [(nivel, node), ...] dos nós ainda "abertos"
+    pilha = []
     dentro_da_lista = False
 
     for linha in linhas:
@@ -478,7 +464,6 @@ def parsear_topicos_md(conteudo):
             pilha.append((nivel, node))
         elif not dentro_da_lista:
             cabecalho.append(linha)
-        # linhas em branco dentro da lista são só ignoradas na reconstrução
 
     return "\n".join(cabecalho).rstrip("\n"), raiz
 
@@ -497,10 +482,6 @@ def montar_topicos_md(cabecalho, topicos):
 
 
 def mesclar_estrutura_no_topicos_md(conteudo_atual, nome_eixo, estrutura_doc):
-    """Junta a estrutura vinda do Google Doc (até 3 níveis: tópico, subtópico,
-    sub-subtópico) com o topicos.md existente, só ADICIONANDO o que ainda não
-    existe (por texto exato em cada nível), sem nunca desmarcar ou remover o
-    que já está lá. Retorna (novo_conteudo, resumo)."""
     if conteudo_atual is None:
         cabecalho = f"# Tópicos — {nome_eixo}"
         topicos = []
@@ -575,8 +556,6 @@ def sincronizar_topicos_do_doc(cfg, nome_eixo):
 
 
 def sincronizar_todos_os_eixos(cfg):
-    """Roda a sincronização do Google Doc pra todo eixo que tiver google_doc_id
-    preenchido, pulando os demais. Retorna um texto-resumo único."""
     linhas = ["Sincronização de todos os eixos:"]
     algum_configurado = False
     for eixo in cfg["eixos_estudo"]:
@@ -596,11 +575,9 @@ def sincronizar_todos_os_eixos(cfg):
     return "\n".join(linhas)
 
 
-# ---------- Reinício completo (repetição espaçada + tópicos + diários) ----------
+# ---------- Reinício ----------
 
 def reiniciar_estado_estudo(cfg, estado):
-    """Zera o progresso de repetição espaçada de todos os eixos, mantendo o
-    offset do Telegram intacto (pra não reprocessar mensagens antigas)."""
     estado["eixos"] = {e["nome"]: eixo_info_default() for e in cfg["eixos_estudo"]}
     estado["janela_notificada_hoje"] = {}
     estado["sugestao_hoje"] = {}
@@ -614,8 +591,6 @@ def desmarcar_todos_recursivo(nodes):
 
 
 def reiniciar_topicos_e_diario_do_eixo(cfg, nome_eixo):
-    """Desmarca todos os tópicos (sem apagar a lista) e limpa o diario.md,
-    voltando só ao título. Retorna uma mensagem de status."""
     owner, repo = repo_do_eixo(cfg, nome_eixo)
     if not owner:
         return f"{nome_eixo}: sem repositório configurado, pulei"
@@ -678,9 +653,6 @@ def processar_mensagens(cfg, estado, hoje):
         if not texto:
             continue
 
-        # Segurança: ignora qualquer mensagem que não venha do teu chat.
-        # Isso garante que, mesmo que alguém descubra o username do bot,
-        # não consiga executar comandos nem ler nenhuma resposta.
         if not CHAT_ID or remetente_chat_id != str(CHAT_ID):
             print(f"Mensagem ignorada de chat não autorizado: {remetente_chat_id}")
             continue
@@ -688,7 +660,7 @@ def processar_mensagens(cfg, estado, hoje):
         if texto.startswith("/concluido"):
             partes = texto.split(maxsplit=1)
             if len(partes) < 2:
-                enviar_mensagem("Uso: /concluido NOME_DO_EIXO [nota opcional] (ex: /concluido RTIEBT revisei esquemas)")
+                enviar_mensagem("Uso: /concluido NOME_DO_EIXO [nota opcional] (ex: /concluido Eletrotecnia revisei esquemas)")
                 continue
             nomes_validos = [e["nome"] for e in cfg["eixos_estudo"]]
             nome_eixo, notas = separar_eixo_e_notas(partes[1], nomes_validos)
@@ -722,7 +694,7 @@ def processar_mensagens(cfg, estado, hoje):
                 enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
                 continue
             if not topico_texto:
-                enviar_mensagem("Falta o texto do tópico. Ex: /topico RTIEBT Esquemas trifásicos")
+                enviar_mensagem("Falta o texto do tópico. Ex: /topico Eletrotecnia Esquemas trifásicos")
                 continue
             enviar_mensagem(adicionar_topico(cfg, nome_eixo, topico_texto))
 
@@ -737,7 +709,7 @@ def processar_mensagens(cfg, estado, hoje):
                 enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
                 continue
             if not topico_texto:
-                enviar_mensagem("Falta o texto do tópico. Ex: /feito RTIEBT Esquemas trifásicos")
+                enviar_mensagem("Falta o texto do tópico. Ex: /feito Eletrotecnia Esquemas trifásicos")
                 continue
             enviar_mensagem(marcar_topico_concluido(cfg, nome_eixo, topico_texto))
 
@@ -822,8 +794,6 @@ def verificar_bloco_de_estudo(cfg, estado, agora):
 
 
 def fechar_dia_se_necessario(cfg, estado, agora):
-    """Se já passou das 23:45 e o dia ainda não foi 'fechado', regista faltas
-    dos blocos sugeridos e não concluídos, e reseta os marcadores diários."""
     hoje_str = agora.date().isoformat()
     if estado.get("ultimo_fechamento") == hoje_str:
         return

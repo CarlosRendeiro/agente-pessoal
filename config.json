@@ -1,28 +1,70 @@
 {
-  "_comentario": "Edita este arquivo livremente. Horários no formato HH:MM. Dias: seg,ter,qua,qui,sex,sab,dom.",
+  "_comentario": "Configuração sincronizada com os repositórios reais do GitHub (rtiebt-notas, motores-notas, etc.) e regras de proteção biológica.",
   "fuso_horario": "Europe/Lisbon",
   "compromissos_fixos": [
-    {"nome": "Kairós (estágio)", "dias": ["seg","ter","qua","qui","sex"], "inicio": "09:00", "fim": "17:00"},
-    {"nome": "CTeSP (aulas)",    "dias": ["seg","ter","qua","qui","sex"], "inicio": "18:30", "fim": "23:00"}
+    {"nome": "Treino & Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "06:00", "fim": "08:20"},
+    {"nome": "Estágio EFA (Kairós)", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:30", "fim": "17:30"},
+    {"nome": "CTeSP - Moodle / Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "22:15"}
   ],
   "janelas_estudo": [
-    {"nome": "Bloco da tarde", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:00", "fim": "18:30"},
-    {"nome": "Bloco fim de semana manhã", "dias": ["sab","dom"], "inicio": "10:00", "fim": "12:00"},
-    {"nome": "Bloco fim de semana tarde", "dias": ["sab","dom"], "inicio": "15:00", "fim": "17:30"}
+    {"nome": "Transição & Lanche", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
+    {"nome": "Bloco Quinta (Revisão Leve)", "dias": ["qui"], "inicio": "18:30", "fim": "19:45"},
+    {"nome": "Bloco Sábado Manhã (Foco Único)", "dias": ["sab"], "inicio": "09:30", "fim": "12:15"}
   ],
   "duracao_bloco_min": 45,
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
   "eixos_estudo": [
-    {"nome": "RTIEBT",       "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "rtiebt-notas",       "google_doc_id": "1EqWZTNllsyyuBaPkm_QJPcpHPi2X32zCRfx-BvjyabE"},
-    {"nome": "Motores",      "peso": 3, "repo_owner": "CarlosRendeiro", "repo_nome": "motores-notas",      "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"},
-    {"nome": "Cartografia",  "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "cartografia-notas",  "google_doc_id": "1X7KFBVr5KW5VgAOReHl280sk4VzNl-j5N0kwEiMwQgU"},
-    {"nome": "DBA",          "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "dba-notas",          "google_doc_id": "1d0I55-GjAdPfq3a4d-mUGzLeHCcigZa35-cGxruYgSE"},
-    {"nome": "Linux",        "peso": 2, "repo_owner": "CarlosRendeiro", "repo_nome": "linux-notas",        "google_doc_id": "1a_MNsKHxgA_WB3EGLRPSRtnHR2_uaQ_KgpNYMvpKzSE"},
-    {"nome": "Python",       "peso": 1, "repo_owner": "CarlosRendeiro", "repo_nome": "python-notas",       "google_doc_id": "1FvKYMpC_yGxVrff8Zki-TnktaPAA8eTkskh6ce16brk"}
+    {
+      "nome": "Eletrotecnia (E)",
+      "peso": 3,
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "rtiebt-notas",
+      "google_doc_id": "1EqWZTNllsyyuBaPkm_QJPcpHPi2X32zCRfx-BvjyabE"
+    },
+    {
+      "nome": "Elementos de Física e Química (EFQ)",
+      "peso": 3,
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "motores-notas",
+      "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"
+    },
+    {
+      "nome": "Tópicos de Matemática (TM)",
+      "peso": 3,
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "python-notas",
+      "google_doc_id": "1FvKYMpC_yGxVrff8Zki-TnktaPAA8eTkskh6ce16brk"
+    },
+    {
+      "nome": "Desenho Assistido (DACIE)",
+      "peso": 3,
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "cartografia-notas",
+      "google_doc_id": "1X7KFBVr5KW5VgAOReHl280sk4VzNl-j5N0kwEiMwQgU"
+    },
+    {
+      "nome": "Inglês Técnico",
+      "peso": 1,
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "linux-notas",
+      "google_doc_id": "1a_MNsKHxgA_WB3EGLRPSRtnHR2_uaQ_KgpNYMvpKzSE"
+    },
+    {
+      "nome": "PostGIS / Linux",
+      "peso": 1,
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "dba-notas",
+      "google_doc_id": "1d0I55-GjAdPfq3a4d-mUGzLeHCcigZa35-cGxruYgSE"
+    }
   ],
   "regra_never_miss_twice": {
     "ativa": true,
     "faltas_para_subir_prioridade": 2
+  },
+  "bloqueio_blindagem": {
+    "quinta_noite_livre_apos": "19:45",
+    "domingo_estudo_zero": true,
+    "horario_sono_obrigatorio": "23:30"
   },
   "arquivo_topicos": "topicos.md",
   "arquivo_diario": "diario.md",

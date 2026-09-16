@@ -1,41 +1,41 @@
 {
   "eixos": {
-    "RTIEBT": {
+    "Eletrotecnia (E)": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Motores": {
+    "Elementos de Física e Química (EFQ)": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Cartografia": {
+    "Tópicos de Matemática (TM)": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "DBA": {
+    "Desenho Assistido (DACIE)": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Linux": {
+    "Inglês Técnico": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
-    "Python": {
+    "PostGIS / Linux": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,

@@ -2,8 +2,12 @@ name: Agente Pessoal
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch: {}
+
+concurrency:
+  group: agente-pessoal-group
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -39,6 +43,6 @@ jobs:
         run: |
           git config user.name "agente-pessoal-bot"
           git config user.email "agente-pessoal-bot@users.noreply.github.com"
-          git add estado.json
+          git add estado.json diario.md topicos.md 2>/dev/null || true
           git diff --quiet --cached || git commit -m "Atualiza progresso de estudo [skip ci]"
           git push

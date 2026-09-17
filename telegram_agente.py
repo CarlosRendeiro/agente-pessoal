@@ -8,7 +8,9 @@ Ele faz duas coisas em cada execução:
 1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido Eletrotecnia)
    e processa os comandos.
 2. Verifica se agora é hora de um bloco de estudo e, se for, manda uma
-   mensagem no Telegram avisando qual eixo estudar.
+   mensagem no Telegram avisando qual eixo estudar. De segunda a sexta,
+   cada eixo tem um dia fixo (ver "dia" em config.json); sábado fica livre
+   para revisão/catch-up com base na repetição espaçada.
 
 Toda a configuração fica em config.json. O progresso fica em estado.json,
 que é salvo de volta no repositório automaticamente pelo GitHub Actions.
@@ -21,6 +23,7 @@ Comandos que tu podes mandar pro bot no Telegram:
   /topicos Eletrotecnia                            -> lista os tópicos (pendentes e concluídos) do eixo
   /sincronizar Eletrotecnia                        -> puxa tópicos/subtópicos do Google Doc do eixo pro topicos.md
   /sincronizartudo                                -> faz isso pra todos os eixos que já têm google_doc_id configurado
+  /reiniciartudo CONFIRMAR                        -> zera repetição espaçada, tópicos e diários de TODOS os eixos (irreversível)
   /revisar             -> lista o que está vencido pra revisão agora
   /status              -> resumo de progresso por eixo
   /ajuda               -> lista os comandos
@@ -768,6 +771,15 @@ def janela_ativa_agora(cfg, agora):
     return None
 
 
+def eixo_do_dia_fixo(cfg, dia):
+    """Retorna o eixo com estudo fixo nesse dia da semana (código em DIAS_PT: seg/ter/qua/qui/sex),
+    ou None se o dia não tiver eixo fixo (ex: sábado, que fica livre para revisão/catch-up)."""
+    for eixo in cfg["eixos_estudo"]:
+        if eixo.get("dia") == dia:
+            return eixo["nome"]
+    return None
+
+
 def verificar_bloco_de_estudo(cfg, estado, agora):
     hoje_str = agora.date().isoformat()
     janela = janela_ativa_agora(cfg, agora)
@@ -777,7 +789,17 @@ def verificar_bloco_de_estudo(cfg, estado, agora):
     if estado["janela_notificada_hoje"].get(janela["nome"]) == hoje_str:
         return
 
-    eixo, eh_revisao, atraso = escolher_eixo(cfg, estado, agora.date())
+    dia = DIAS_PT[agora.weekday()]
+    eixo_fixo = eixo_do_dia_fixo(cfg, dia)
+
+    if eixo_fixo:
+        eixo = eixo_fixo
+        info = estado["eixos"].get(eixo, eixo_info_default())
+        atraso = dias_atraso(agora.date(), info["proxima_revisao"])
+        eh_revisao = atraso >= 0
+    else:
+        eixo, eh_revisao, atraso = escolher_eixo(cfg, estado, agora.date())
+
     duracao = cfg["duracao_bloco_min"]
     if eh_revisao:
         rotulo = "🔁 Revisão vencida" if atraso > 0 else "🔁 Revisão"

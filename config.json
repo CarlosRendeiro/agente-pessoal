@@ -2,14 +2,14 @@
   "_comentario": "Configuracao com nomes simples e sem espacos nos eixos de estudo.",
   "fuso_horario": "Europe/Lisbon",
   "compromissos_fixos": [
-    {"nome": "Treino_Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "06:00", "fim": "08:20"},
+    {"nome": "Treino_Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:00", "fim": "08:20"},
     {"nome": "Estagio_EFA", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:30", "fim": "17:30"},
-    {"nome": "CTeSP_Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "22:15"}
+    {"nome": "CTeSP_Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "23:00"}
   ],
   "janelas_estudo": [
     {"nome": "Foco", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
     {"nome": "Quinta_Leve", "dias": ["qui"], "inicio": "18:30", "fim": "19:45"},
-    {"nome": "Sabado_Manha", "dias": ["sab"], "inicio": "09:30", "fim": "12:15"}
+    {"nome": "Sabado_Manha", "dias": ["sab"], "inicio": "09:00", "fim": "12:15"}
   ],
   "duracao_bloco_min": 45,
   "intervalos_revisao_dias": [1, 2, 4, 7, 14, 30],
@@ -18,35 +18,35 @@
       "nome": "Eletrotecnia",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "rtiebt-notas",
+      "repo_nome": "eletrotecnia-notas",
       "google_doc_id": "1EqWZTNllsyyuBaPkm_QJPcpHPi2X32zCRfx-BvjyabE"
     },
     {
       "nome": "EFQ",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "motores-notas",
+      "repo_nome": "efq-notas",
       "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"
     },
     {
       "nome": "TM",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "python-notas",
+      "repo_nome": "tm-notas",
       "google_doc_id": "1FvKYMpC_yGxVrff8Zki-TnktaPAA8eTkskh6ce16brk"
     },
     {
       "nome": "DACIE",
       "peso": 3,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "cartografia-notas",
+      "repo_nome": "dacie-notas",
       "google_doc_id": "1X7KFBVr5KW5VgAOReHl280sk4VzNl-j5N0kwEiMwQgU"
     },
     {
-      "nome": "Ingles",
+      "nome": "Linguas",
       "peso": 1,
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "linux-notas",
+      "repo_nome": "linguas-notas",
       "google_doc_id": "1a_MNsKHxgA_WB3EGLRPSRtnHR2_uaQ_KgpNYMvpKzSE"
     },
     {
@@ -62,7 +62,7 @@
     "faltas_para_subir_prioridade": 2
   },
   "bloqueio_blindagem": {
-    "quinta_noite_livre_apos": "19:45",
+    "quinta_noite_livre_apos": "21:00",
     "domingo_estudo_zero": true,
     "horario_sono_obrigatorio": "23:30"
   },

@@ -3,7 +3,7 @@
 Agente Pessoal — versão Telegram (roda na nuvem via GitHub Actions)
 --------------------------------------------------------------------
 Rotina executada a cada 15 minutos pelo GitHub Actions:
-1. Processa mensagens e comandos pendentes do Telegram via long polling/offset.
+1. Processa mensagens e comandos pendentes do Telegram via polling com offset.
 2. Notifica o início de blocos de estudo conforme config.json e estado.json.
 3. Executa a rotina de fechamento diário e repetição espaçada.
 """
@@ -801,18 +801,18 @@ def verificar_bloco_de_estudo(cfg, estado, agora):
 
 def fechar_dia_se_necessario(cfg, estado, agora):
     hoje_str = agora.date().isoformat()
-    if estado.get("ultimo_fechamento") == hoje_str:
-        return
-
+    ultimo = estado.get("ultimo_fechamento")
     hora_str = agora.strftime("%H:%M")
-    # Dispara a partir do horário de descanso/fim de dia (23:30)
-    if hora_str < "23:30":
+
+    # Fecha o dia atual se já passou das 23:30, ou processa pendências se o dia virou
+    precisa_fechar = (ultimo != hoje_str and hora_str >= "23:30") or (ultimo is not None and ultimo < hoje_str)
+    if not precisa_fechar:
         return
 
     sugestoes = estado.get("sugestao_hoje", {})
     for _janela_nome, eixo in sugestoes.items():
         info = estado["eixos"].setdefault(eixo, eixo_info_default())
-        if info["ultima_data"] != hoje_str:
+        if info["ultima_data"] != (ultimo or hoje_str):
             info["faltas_seguidas"] += 1
             if info["faltas_seguidas"] >= cfg["regra_never_miss_twice"]["faltas_para_subir_prioridade"]:
                 enviar_mensagem(f"⚠️ {eixo} ficou para trás — prioridade sobe (never miss twice).")

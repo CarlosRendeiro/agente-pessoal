@@ -18,7 +18,7 @@ Este agente roda **100% na nuvem** (nos servidores do GitHub Actions), funcionan
 ##  Regras de Blindagem Integradas
 
 - **Sono Protegido:** Bloqueio de notificações entre as 23:30 e as 06:00 (Fuso horário `Europe/Lisbon`).
-- **Recuperação:** Quinta-feira à noite livre (pós-19:45) e **Domingo Regenerativo (100% livre de estudo)**.
+- **Recuperação:** Quinta-feira à noite livre (pós-21:00) e **Domingo Regenerativo (100% livre de estudo)**.
 - **Segurança Absoluta:** Chaves e tokens ficam guardados exclusivamente em variáveis secretas do GitHub — **nunca** no código público.
 
 ---

@@ -2,31 +2,10 @@
 """
 Agente Pessoal — versão Telegram (roda na nuvem via GitHub Actions)
 --------------------------------------------------------------------
-Este script é chamado automaticamente pelo GitHub Actions a cada 15 minutos.
-Ele faz duas coisas em cada execução:
-
-1. Lê mensagens novas que tu mandaste pro bot no Telegram (ex: /concluido Eletrotecnia)
-   e processa os comandos.
-2. Verifica se agora é hora de um bloco de estudo e, se for, manda uma
-   mensagem no Telegram avisando qual eixo estudar. De segunda a sexta,
-   cada eixo tem um dia fixo (ver "dia" em config.json); sábado fica livre
-   para revisão/catch-up com base na repetição espaçada.
-
-Toda a configuração fica em config.json. O progresso fica em estado.json,
-que é salvo de volta no repositório automaticamente pelo GitHub Actions.
-
-Comandos que tu podes mandar pro bot no Telegram:
-  /concluido Eletrotecnia                         -> marca o bloco de hoje como feito (repetição espaçada)
-  /concluido Eletrotecnia fiz revisão de esquemas -> marca feito E regista a nota no diário do repositório do eixo
-  /topico Eletrotecnia Esquemas trifásicos        -> adiciona um tópico novo à lista do eixo
-  /feito Eletrotecnia Esquemas trifásicos          -> marca esse tópico como concluído
-  /topicos Eletrotecnia                            -> lista os tópicos (pendentes e concluídos) do eixo
-  /sincronizar Eletrotecnia                        -> puxa tópicos/subtópicos do Google Doc do eixo pro topicos.md
-  /sincronizartudo                                -> faz isso pra todos os eixos que já têm google_doc_id configurado
-  /reiniciartudo CONFIRMAR                        -> zera repetição espaçada, tópicos e diários de TODOS os eixos (irreversível)
-  /revisar             -> lista o que está vencido pra revisão agora
-  /status              -> resumo de progresso por eixo
-  /ajuda               -> lista os comandos
+Rotina executada a cada 15 minutos pelo GitHub Actions:
+1. Processa mensagens e comandos pendentes do Telegram via long polling/offset.
+2. Notifica o início de blocos de estudo conforme config.json e estado.json.
+3. Executa a rotina de fechamento diário e repetição espaçada.
 """
 
 import base64
@@ -42,7 +21,7 @@ from googleapiclient.discovery import build as google_build
 
 try:
     from zoneinfo import ZoneInfo
-except ImportError:  # Python < 3.9, não deve acontecer no runner do GitHub Actions
+except ImportError:
     ZoneInfo = None
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -51,7 +30,6 @@ CONFIG_PATH = BASE_DIR / "config.json"
 DIAS_PT = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"]
 
 GOOGLE_SA_JSON = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 PROGRESSO_TOKEN = os.environ.get("PROGRESSO_REPO_TOKEN")
@@ -67,8 +45,13 @@ def caminho_estado(cfg):
 
 
 def eixo_info_default():
-    return {"ultima_data": None, "faltas_seguidas": 0, "total_blocos": 0,
-            "nivel_revisao": 0, "proxima_revisao": None}
+    return {
+        "ultima_data": None,
+        "faltas_seguidas": 0,
+        "total_blocos": 0,
+        "nivel_revisao": 0,
+        "proxima_revisao": None,
+    }
 
 
 def carregar_estado(cfg):
@@ -202,8 +185,10 @@ def marcar_concluido(cfg, estado, nome_eixo, hoje):
     info["total_blocos"] += 1
     info["nivel_revisao"] = nivel
     info["proxima_revisao"] = (hoje + timedelta(days=intervalos[nivel])).isoformat()
-    return (f"Registado: bloco de {nome_eixo} concluído hoje. Total: {info['total_blocos']} blocos. "
-            f"Próxima revisão: {info['proxima_revisao']} (nível {nivel}).")
+    return (
+        f"Registado: bloco de {nome_eixo} concluído hoje. Total: {info['total_blocos']} blocos. "
+        f"Próxima revisão: {info['proxima_revisao']} (nível {nivel})."
+    )
 
 
 def texto_status(cfg, estado):
@@ -235,22 +220,20 @@ def texto_revisar(cfg, estado, hoje):
 
 TEXTO_AJUDA = (
     "Comandos disponíveis:\n"
-    "/concluido NOME_DO_EIXO [nota opcional] — marca o bloco de hoje como feito, "
-    "e se escreveres uma nota, ela vai pro diário do repositório do eixo\n"
+    "/concluido NOME_DO_EIXO [nota opcional] — marca o bloco como feito e atualiza o diário\n"
     "/topico NOME_DO_EIXO texto — adiciona um tópico novo\n"
-    "/feito NOME_DO_EIXO texto — marca esse tópico como concluído\n"
-    "/topicos NOME_DO_EIXO — lista os tópicos pendentes e concluídos\n"
-    "/sincronizar NOME_DO_EIXO — puxa tópicos/subtópicos novos do Google Doc do eixo\n"
-    "/sincronizartudo — faz isso pra todos os eixos com google_doc_id configurado\n"
-    "/reiniciartudo CONFIRMAR — zera repetição espaçada, tópicos e diários de TODOS os eixos (irreversível)\n"
-    "/revisar — o que está vencido agora\n"
-    "/status — resumo de progresso\n"
-    "/ajuda — esta mensagem\n"
-    "(as respostas podem levar até 15 min, é quando o robô roda de novo)"
+    "/feito NOME_DO_EIXO texto — marca o tópico como concluído\n"
+    "/topicos NOME_DO_EIXO — lista tópicos pendentes e concluídos\n"
+    "/sincronizar NOME_DO_EIXO — sincroniza tópicos do Google Doc correspondente\n"
+    "/sincronizartudo — sincroniza todos os eixos configurados\n"
+    "/reiniciartudo CONFIRMAR — reinicia repetição espaçada e registos\n"
+    "/revisar — eixos pendentes de revisão\n"
+    "/status — visão geral do progresso\n"
+    "/ajuda — lista de instruções"
 )
 
 
-# ---------- Repositório por eixo (GitHub API): tópicos + diário ----------
+# ---------- Repositório por eixo (GitHub API) ----------
 
 def repo_do_eixo(cfg, nome_eixo):
     for eixo in cfg["eixos_estudo"]:
@@ -260,7 +243,6 @@ def repo_do_eixo(cfg, nome_eixo):
 
 
 def api_ler_arquivo(owner, repo, caminho):
-    """Retorna (conteudo, sha). sha é None se o arquivo ainda não existe."""
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{caminho}"
     headers = {
         "Authorization": f"Bearer {PROGRESSO_TOKEN}",
@@ -272,8 +254,7 @@ def api_ler_arquivo(owner, repo, caminho):
         return base64.b64decode(dados["content"]).decode("utf-8"), dados["sha"]
     elif r.status_code == 404:
         return None, None
-    else:
-        raise RuntimeError(f"Erro ao ler {owner}/{repo}/{caminho}: {r.status_code} {r.text}")
+    raise RuntimeError(f"Erro ao ler {owner}/{repo}/{caminho}: {r.status_code} {r.text}")
 
 
 def api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha, mensagem_commit):
@@ -294,12 +275,11 @@ def api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha, mensagem_commit
 
 
 def registrar_diario(cfg, nome_eixo, notas, hoje):
-    """Acrescenta uma entrada no diario.md do repositório do eixo."""
     if not PROGRESSO_TOKEN:
-        print("Aviso: PROGRESSO_REPO_TOKEN não configurado, pulando registo de diário.")
+        print("Aviso: PROGRESSO_REPO_TOKEN não configurado, ignorando registo de diário.")
         return
     owner, repo = repo_do_eixo(cfg, nome_eixo)
-    if not owner:
+    if not owner or not repo:
         return
     caminho = cfg.get("arquivo_diario", "diario.md")
     try:
@@ -309,17 +289,16 @@ def registrar_diario(cfg, nome_eixo, notas, hoje):
         entrada = f"\n## {hoje.isoformat()}\n"
         if notas:
             entrada += f"{notas}\n"
-        api_gravar_arquivo(owner, repo, caminho, conteudo + entrada, sha,
-                            f"Diário: {nome_eixo} em {hoje.isoformat()}")
+        api_gravar_arquivo(owner, repo, caminho, conteudo + entrada, sha, f"Diário: {nome_eixo} em {hoje.isoformat()}")
     except Exception as e:
         print(f"Erro ao registar diário de {nome_eixo}: {e}")
 
 
 def adicionar_topico(cfg, nome_eixo, topico_texto):
     if not PROGRESSO_TOKEN:
-        return "PROGRESSO_REPO_TOKEN não configurado — não consigo gravar no GitHub agora."
+        return "PROGRESSO_REPO_TOKEN não configurado."
     owner, repo = repo_do_eixo(cfg, nome_eixo)
-    if not owner:
+    if not owner or not repo:
         return f"O eixo {nome_eixo} não tem repositório configurado."
     caminho = cfg.get("arquivo_topicos", "topicos.md")
     try:
@@ -327,8 +306,7 @@ def adicionar_topico(cfg, nome_eixo, topico_texto):
         if conteudo is None:
             conteudo = f"# Tópicos — {nome_eixo}\n\n"
         novo_conteudo = conteudo.rstrip("\n") + f"\n- [ ] {topico_texto}\n"
-        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha,
-                            f"Novo tópico em {nome_eixo}: {topico_texto}")
+        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha, f"Novo tópico em {nome_eixo}: {topico_texto}")
         return f"Tópico adicionado em {nome_eixo}: {topico_texto}"
     except Exception as e:
         return f"Erro ao adicionar tópico: {e}"
@@ -336,9 +314,9 @@ def adicionar_topico(cfg, nome_eixo, topico_texto):
 
 def marcar_topico_concluido(cfg, nome_eixo, topico_texto):
     if not PROGRESSO_TOKEN:
-        return "PROGRESSO_REPO_TOKEN não configurado — não consigo gravar no GitHub agora."
+        return "PROGRESSO_REPO_TOKEN não configurado."
     owner, repo = repo_do_eixo(cfg, nome_eixo)
-    if not owner:
+    if not owner or not repo:
         return f"O eixo {nome_eixo} não tem repositório configurado."
     caminho = cfg.get("arquivo_topicos", "topicos.md")
     try:
@@ -354,8 +332,7 @@ def marcar_topico_concluido(cfg, nome_eixo, topico_texto):
                 break
         if not encontrado:
             return f"Não encontrei um tópico pendente parecido com '{topico_texto}' em {nome_eixo}."
-        api_gravar_arquivo(owner, repo, caminho, "\n".join(linhas), sha,
-                            f"Tópico concluído em {nome_eixo}: {topico_texto}")
+        api_gravar_arquivo(owner, repo, caminho, "\n".join(linhas), sha, f"Tópico concluído em {nome_eixo}: {topico_texto}")
         return f"Marcado como concluído em {nome_eixo}: {topico_texto}"
     except Exception as e:
         return f"Erro ao marcar tópico: {e}"
@@ -363,13 +340,13 @@ def marcar_topico_concluido(cfg, nome_eixo, topico_texto):
 
 def listar_topicos(cfg, nome_eixo):
     owner, repo = repo_do_eixo(cfg, nome_eixo)
-    if not owner:
+    if not owner or not repo:
         return f"O eixo {nome_eixo} não tem repositório configurado."
     caminho = cfg.get("arquivo_topicos", "topicos.md")
     try:
         conteudo, _sha = api_ler_arquivo(owner, repo, caminho)
         if conteudo is None:
-            return f"Ainda não há tópicos registados em {nome_eixo}. Usa /topico {nome_eixo} <texto> pra começar."
+            return f"Ainda não há tópicos em {nome_eixo}. Usa /topico {nome_eixo} <texto>."
         pendentes = [l.strip()[6:] for l in conteudo.split("\n") if l.strip().startswith("- [ ]")]
         feitos = [l.strip()[6:] for l in conteudo.split("\n") if l.strip().startswith("- [x]")]
         linhas = [f"Tópicos de {nome_eixo} — {len(feitos)} feitos, {len(pendentes)} pendentes:"]
@@ -433,10 +410,19 @@ def extrair_estrutura_do_doc(doc_id):
             topico_atual = {"topico": texto, "subtopicos": []}
             estrutura.append(topico_atual)
             subtopico_atual = None
-        elif estilo == "HEADING_2" and topico_atual is not None:
+        elif estilo == "HEADING_2":
+            if topico_atual is None:
+                topico_atual = {"topico": "Geral", "subtopicos": []}
+                estrutura.append(topico_atual)
             subtopico_atual = {"subtopico": texto, "subsubtopicos": []}
             topico_atual["subtopicos"].append(subtopico_atual)
-        elif estilo == "HEADING_3" and subtopico_atual is not None:
+        elif estilo == "HEADING_3":
+            if topico_atual is None:
+                topico_atual = {"topico": "Geral", "subtopicos": []}
+                estrutura.append(topico_atual)
+            if subtopico_atual is None:
+                subtopico_atual = {"subtopico": "Tópicos Gerais", "subsubtopicos": []}
+                topico_atual["subtopicos"].append(subtopico_atual)
             subtopico_atual["subsubtopicos"].append(texto)
 
     return estrutura
@@ -517,17 +503,19 @@ def mesclar_estrutura_no_topicos_md(conteudo_atual, nome_eixo, estrutura_doc):
                     contadores["subsubtopicos"] += 1
 
     novo_conteudo = montar_topicos_md(cabecalho, topicos)
-    resumo = (f"{contadores['topicos']} tópico(s), {contadores['subtopicos']} subtópico(s) e "
-              f"{contadores['subsubtopicos']} sub-subtópico(s) novo(s)")
+    resumo = (
+        f"{contadores['topicos']} tópico(s), {contadores['subtopicos']} subtópico(s) e "
+        f"{contadores['subsubtopicos']} sub-subtópico(s) novo(s)"
+    )
     return novo_conteudo, resumo
 
 
 def sincronizar_topicos_do_doc(cfg, nome_eixo):
     owner, repo = repo_do_eixo(cfg, nome_eixo)
-    if not owner:
+    if not owner or not repo:
         return f"O eixo {nome_eixo} não tem repositório configurado."
     if not PROGRESSO_TOKEN:
-        return "PROGRESSO_REPO_TOKEN não configurado — não consigo gravar no GitHub agora."
+        return "PROGRESSO_REPO_TOKEN não configurado."
 
     doc_id = None
     for eixo in cfg["eixos_estudo"]:
@@ -542,8 +530,10 @@ def sincronizar_topicos_do_doc(cfg, nome_eixo):
         return f"Erro ao ler o Google Doc de {nome_eixo}: {e}"
 
     if not estrutura:
-        return (f"Não encontrei nenhum título Heading 1 no doc de {nome_eixo}. "
-                f"Confere se os tópicos estão marcados com o estilo 'Título 1' e os subtópicos com 'Título 2'.")
+        return (
+            f"Não encontrei títulos formatados no doc de {nome_eixo}. "
+            f"Verifica se os títulos estão marcados com estilos Heading 1/2/3."
+        )
 
     caminho = cfg.get("arquivo_topicos", "topicos.md")
     try:
@@ -551,8 +541,7 @@ def sincronizar_topicos_do_doc(cfg, nome_eixo):
         novo_conteudo, resumo = mesclar_estrutura_no_topicos_md(conteudo_atual, nome_eixo, estrutura)
         if novo_conteudo == conteudo_atual:
             return f"Sincronizado com {nome_eixo}: nada novo (já estava tudo atualizado)."
-        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha,
-                            f"Sincronização com Google Doc: {nome_eixo}")
+        api_gravar_arquivo(owner, repo, caminho, novo_conteudo, sha, f"Sincronização com Google Doc: {nome_eixo}")
         return f"Sincronizado com {nome_eixo}: {resumo}."
     except Exception as e:
         return f"Erro ao gravar tópicos sincronizados de {nome_eixo}: {e}"
@@ -564,7 +553,7 @@ def sincronizar_todos_os_eixos(cfg):
     for eixo in cfg["eixos_estudo"]:
         nome = eixo["nome"]
         if not eixo.get("google_doc_id"):
-            linhas.append(f"- {nome}: sem google_doc_id configurado, pulei")
+            linhas.append(f"- {nome}: sem google_doc_id configurado, ignorado")
             continue
         algum_configurado = True
         try:
@@ -574,7 +563,7 @@ def sincronizar_todos_os_eixos(cfg):
         linhas.append(f"- {nome}: {resultado}")
 
     if not algum_configurado:
-        return "Nenhum eixo tem google_doc_id configurado ainda em config.json."
+        return "Nenhum eixo tem google_doc_id configurado em config.json."
     return "\n".join(linhas)
 
 
@@ -595,8 +584,8 @@ def desmarcar_todos_recursivo(nodes):
 
 def reiniciar_topicos_e_diario_do_eixo(cfg, nome_eixo):
     owner, repo = repo_do_eixo(cfg, nome_eixo)
-    if not owner:
-        return f"{nome_eixo}: sem repositório configurado, pulei"
+    if not owner or not repo:
+        return f"{nome_eixo}: sem repositório configurado"
     if not PROGRESSO_TOKEN:
         return f"{nome_eixo}: PROGRESSO_REPO_TOKEN não configurado"
 
@@ -611,8 +600,9 @@ def reiniciar_topicos_e_diario_do_eixo(cfg, nome_eixo):
             desmarcar_todos_recursivo(topicos)
             novo_conteudo = montar_topicos_md(cabecalho or f"# Tópicos — {nome_eixo}", topicos)
             if novo_conteudo != conteudo_topicos:
-                api_gravar_arquivo(owner, repo, caminho_topicos, novo_conteudo, sha_topicos,
-                                    f"Reinício: tópicos desmarcados em {nome_eixo}")
+                api_gravar_arquivo(
+                    owner, repo, caminho_topicos, novo_conteudo, sha_topicos, f"Reinício: tópicos desmarcados em {nome_eixo}"
+                )
             partes_msg.append("tópicos desmarcados")
         else:
             partes_msg.append("sem topicos.md ainda")
@@ -622,8 +612,7 @@ def reiniciar_topicos_e_diario_do_eixo(cfg, nome_eixo):
     try:
         _conteudo_diario, sha_diario = api_ler_arquivo(owner, repo, caminho_diario)
         novo_diario = f"# Diário de progresso — {nome_eixo}\n"
-        api_gravar_arquivo(owner, repo, caminho_diario, novo_diario, sha_diario,
-                            f"Reinício: diário zerado em {nome_eixo}")
+        api_gravar_arquivo(owner, repo, caminho_diario, novo_diario, sha_diario, f"Reinício: diário zerado em {nome_eixo}")
         partes_msg.append("diário zerado")
     except Exception as e:
         partes_msg.append(f"erro no diário ({e})")
@@ -636,12 +625,11 @@ def reiniciar_tudo(cfg, estado):
     linhas = ["Reinício completo:"]
     for eixo in cfg["eixos_estudo"]:
         linhas.append("- " + reiniciar_topicos_e_diario_do_eixo(cfg, eixo["nome"]))
-    linhas.append("")
-    linhas.append("Repetição espaçada zerada pra todos os eixos. A partir de agora, é como começar do zero.")
+    linhas.append("\nRepetição espaçada zerada para todos os eixos.")
     return "\n".join(linhas)
 
 
-# ---------- Processamento das mensagens recebidas ----------
+# ---------- Processamento de Mensagens ----------
 
 def processar_mensagens(cfg, estado, hoje):
     mensagens = buscar_mensagens_novas(estado)
@@ -663,12 +651,12 @@ def processar_mensagens(cfg, estado, hoje):
         if texto.startswith("/concluido"):
             partes = texto.split(maxsplit=1)
             if len(partes) < 2:
-                enviar_mensagem("Uso: /concluido NOME_DO_EIXO [nota opcional] (ex: /concluido Eletrotecnia revisei esquemas)")
+                enviar_mensagem("Uso: /concluido NOME_DO_EIXO [nota opcional]")
                 continue
             nomes_validos = [e["nome"] for e in cfg["eixos_estudo"]]
             nome_eixo, notas = separar_eixo_e_notas(partes[1], nomes_validos)
             if nome_eixo is None:
-                enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Eixo não reconhecido. Válidos: {', '.join(nomes_validos)}")
                 continue
             resposta = marcar_concluido(cfg, estado, nome_eixo, hoje)
             enviar_mensagem(resposta)
@@ -678,11 +666,11 @@ def processar_mensagens(cfg, estado, hoje):
             partes = texto.split(maxsplit=1)
             nomes_validos = [e["nome"] for e in cfg["eixos_estudo"]]
             if len(partes) < 2:
-                enviar_mensagem(f"Uso: /topicos NOME_DO_EIXO. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Uso: /topicos NOME_DO_EIXO. Válidos: {', '.join(nomes_validos)}")
                 continue
             nome_eixo, _resto = separar_eixo_e_notas(partes[1], nomes_validos)
             if nome_eixo is None:
-                enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Eixo não reconhecido. Válidos: {', '.join(nomes_validos)}")
                 continue
             enviar_mensagem(listar_topicos(cfg, nome_eixo))
 
@@ -694,10 +682,10 @@ def processar_mensagens(cfg, estado, hoje):
                 continue
             nome_eixo, topico_texto = separar_eixo_e_notas(partes[1], nomes_validos)
             if nome_eixo is None:
-                enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Eixo não reconhecido. Válidos: {', '.join(nomes_validos)}")
                 continue
             if not topico_texto:
-                enviar_mensagem("Falta o texto do tópico. Ex: /topico Eletrotecnia Esquemas trifásicos")
+                enviar_mensagem("Falta o texto do tópico.")
                 continue
             enviar_mensagem(adicionar_topico(cfg, nome_eixo, topico_texto))
 
@@ -705,14 +693,14 @@ def processar_mensagens(cfg, estado, hoje):
             partes = texto.split(maxsplit=1)
             nomes_validos = [e["nome"] for e in cfg["eixos_estudo"]]
             if len(partes) < 2:
-                enviar_mensagem("Uso: /feito NOME_DO_EIXO texto do tópico já concluído")
+                enviar_mensagem("Uso: /feito NOME_DO_EIXO texto do tópico")
                 continue
             nome_eixo, topico_texto = separar_eixo_e_notas(partes[1], nomes_validos)
             if nome_eixo is None:
-                enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Eixo não reconhecido. Válidos: {', '.join(nomes_validos)}")
                 continue
             if not topico_texto:
-                enviar_mensagem("Falta o texto do tópico. Ex: /feito Eletrotecnia Esquemas trifásicos")
+                enviar_mensagem("Falta o texto do tópico.")
                 continue
             enviar_mensagem(marcar_topico_concluido(cfg, nome_eixo, topico_texto))
 
@@ -720,10 +708,8 @@ def processar_mensagens(cfg, estado, hoje):
             partes = texto.split(maxsplit=1)
             if len(partes) < 2 or partes[1].strip().upper() != "CONFIRMAR":
                 enviar_mensagem(
-                    "⚠️ Isso vai zerar TODA a repetição espaçada, desmarcar todos os tópicos "
-                    "concluídos e apagar todos os diários de progresso, em todos os eixos. "
-                    "Não tem como desfazer.\n\n"
-                    "Se tens certeza, manda: /reiniciartudo CONFIRMAR"
+                    "⚠️ Isto vai zerar a repetição espaçada, tópicos e diários de TODOS os eixos.\n"
+                    "Para confirmar, envia: /reiniciartudo CONFIRMAR"
                 )
                 continue
             enviar_mensagem(reiniciar_tudo(cfg, estado))
@@ -735,11 +721,11 @@ def processar_mensagens(cfg, estado, hoje):
             partes = texto.split(maxsplit=1)
             nomes_validos = [e["nome"] for e in cfg["eixos_estudo"]]
             if len(partes) < 2:
-                enviar_mensagem(f"Uso: /sincronizar NOME_DO_EIXO. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Uso: /sincronizar NOME_DO_EIXO. Válidos: {', '.join(nomes_validos)}")
                 continue
             nome_eixo, _resto = separar_eixo_e_notas(partes[1], nomes_validos)
             if nome_eixo is None:
-                enviar_mensagem(f"Eixo não reconhecido. Eixos válidos: {', '.join(nomes_validos)}")
+                enviar_mensagem(f"Eixo não reconhecido. Válidos: {', '.join(nomes_validos)}")
                 continue
             enviar_mensagem(sincronizar_topicos_do_doc(cfg, nome_eixo))
 
@@ -753,10 +739,10 @@ def processar_mensagens(cfg, estado, hoje):
             enviar_mensagem(TEXTO_AJUDA)
 
         else:
-            enviar_mensagem("Não entendi. " + TEXTO_AJUDA)
+            enviar_mensagem("Comando não reconhecido. Envia /ajuda para ver as opções.")
 
 
-# ---------- Janela de estudo ----------
+# ---------- Janela de Estudo ----------
 
 def dentro_de(hora_atual, inicio, fim):
     return inicio <= hora_atual <= fim
@@ -772,8 +758,6 @@ def janela_ativa_agora(cfg, agora):
 
 
 def eixo_do_dia_fixo(cfg, dia):
-    """Retorna o eixo com estudo fixo nesse dia da semana (código em DIAS_PT: seg/ter/qua/qui/sex),
-    ou None se o dia não tiver eixo fixo (ex: sábado, que fica livre para revisão/catch-up)."""
     for eixo in cfg["eixos_estudo"]:
         if eixo.get("dia") == dia:
             return eixo["nome"]
@@ -809,7 +793,7 @@ def verificar_bloco_de_estudo(cfg, estado, agora):
 
     enviar_mensagem(
         f'{rotulo}\nBloco "{janela["nome"]}" — foco em {eixo}{extra} ({duracao} min).\n'
-        f'Quando terminar, responde aqui: /concluido {eixo}'
+        f'Quando terminares, responde: /concluido {eixo}'
     )
     estado["janela_notificada_hoje"][janela["nome"]] = hoje_str
     estado.setdefault("sugestao_hoje", {})[janela["nome"]] = eixo
@@ -819,9 +803,9 @@ def fechar_dia_se_necessario(cfg, estado, agora):
     hoje_str = agora.date().isoformat()
     if estado.get("ultimo_fechamento") == hoje_str:
         return
-    
-    # Dispara a partir das 23:30 (dentro da janela de descanso obrigatório)
+
     hora_str = agora.strftime("%H:%M")
+    # Dispara a partir do horário de descanso/fim de dia (23:30)
     if hora_str < "23:30":
         return
 

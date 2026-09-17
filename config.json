@@ -1,5 +1,5 @@
 {
-  "_comentario": "Configuracao com nomes simples e sem espacos nos eixos de estudo.",
+  "_comentario": "Cada eixo tem um dia fixo da semana. Sabado fica livre para revisao/catch-up via repeticao espacada.",
   "fuso_horario": "Europe/Lisbon",
   "compromissos_fixos": [
     {"nome": "Treino_Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:00", "fim": "08:20"},
@@ -17,44 +17,42 @@
     {
       "nome": "Eletrotecnia",
       "peso": 3,
+      "dia": "seg",
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "eletrotecnia-notas",
-      "google_doc_id": "1EqWZTNllsyyuBaPkm_QJPcpHPi2X32zCRfx-BvjyabE"
+      "repo_nome": "eletrotecnia-notes",
+      "google_doc_id": "1kAx1lTYQfezqqt8A4oNjWFA5-Xh2xn5nV2hwCyl4R4g"
     },
     {
       "nome": "EFQ",
       "peso": 3,
+      "dia": "ter",
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "efq-notas",
-      "google_doc_id": "1K2nxv8cl6AHjjvm9USZh_JNtVeKLOZaUm8fVtpXOgIA"
+      "repo_nome": "efq-notes",
+      "google_doc_id": "1fqwamyI6NyZrS_HC5k_xJzvNx0sS1jBzm90sWEN1ifI"
     },
     {
       "nome": "TM",
       "peso": 3,
+      "dia": "qua",
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "tm-notas",
-      "google_doc_id": "1FvKYMpC_yGxVrff8Zki-TnktaPAA8eTkskh6ce16brk"
+      "repo_nome": "tm-notes",
+      "google_doc_id": "1dSmVXEQnHJ2vBjVxp-90bKL5hbbyzKPRFTdJCk2Uq68"
+    },
+    {
+      "nome": "DBA",
+      "peso": 3,
+      "dia": "qui",
+      "repo_owner": "CarlosRendeiro",
+      "repo_nome": "dba-notes",
+      "google_doc_id": "1d0I55-GjAdPfq3a4d-mUGzLeHCcigZa35-cGxruYgSE"
     },
     {
       "nome": "DACIE",
       "peso": 3,
+      "dia": "sex",
       "repo_owner": "CarlosRendeiro",
-      "repo_nome": "dacie-notas",
-      "google_doc_id": "1X7KFBVr5KW5VgAOReHl280sk4VzNl-j5N0kwEiMwQgU"
-    },
-    {
-      "nome": "Linguas",
-      "peso": 1,
-      "repo_owner": "CarlosRendeiro",
-      "repo_nome": "linguas-notas",
-      "google_doc_id": "1a_MNsKHxgA_WB3EGLRPSRtnHR2_uaQ_KgpNYMvpKzSE"
-    },
-    {
-      "nome": "PostGIS",
-      "peso": 1,
-      "repo_owner": "CarlosRendeiro",
-      "repo_nome": "dba-notas",
-      "google_doc_id": "1d0I55-GjAdPfq3a4d-mUGzLeHCcigZa35-cGxruYgSE"
+      "repo_nome": "dacie-notes",
+      "google_doc_id": "1BBhJSWx5WGd4nFiRoFaNxmD7TSOUErv4bx6kTqyxaUk"
     }
   ],
   "regra_never_miss_twice": {

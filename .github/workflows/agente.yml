@@ -2,7 +2,8 @@ name: Agente Pessoal
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+  # Roda a cada 15 min apenas entre as 07:00 e as 23:59 UTC
+    - cron: "*/15 7-23 * * * *"
   workflow_dispatch: {}
 
 concurrency:

@@ -21,21 +21,14 @@
       "nivel_revisao": 0,
       "proxima_revisao": null
     },
+    "DBA": {
+      "ultima_data": null,
+      "faltas_seguidas": 0,
+      "total_blocos": 0,
+      "nivel_revisao": 0,
+      "proxima_revisao": null
+    },
     "DACIE": {
-      "ultima_data": null,
-      "faltas_seguidas": 0,
-      "total_blocos": 0,
-      "nivel_revisao": 0,
-      "proxima_revisao": null
-    },
-    "Ingles": {
-      "ultima_data": null,
-      "faltas_seguidas": 0,
-      "total_blocos": 0,
-      "nivel_revisao": 0,
-      "proxima_revisao": null
-    },
-    "PostGIS": {
       "ultima_data": null,
       "faltas_seguidas": 0,
       "total_blocos": 0,

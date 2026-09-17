@@ -2,7 +2,7 @@
   "_comentario": "Cada eixo tem um dia fixo da semana (seg a sex). Sabado fica livre para revisao/catch-up via repeticao espacada.",
   "fuso_horario": "Europe/Lisbon",
   "compromissos_fixos": [
-    {"nome": "Treino_Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:00", "fim": "08:20"},
+    {"nome": "Atividade_Fisica", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:00", "fim": "08:20"},
     {"nome": "Estagio_EFA", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:30", "fim": "17:30"},
     {"nome": "CTeSP_Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "23:00"}
   ],

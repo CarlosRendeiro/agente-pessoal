@@ -819,7 +819,10 @@ def fechar_dia_se_necessario(cfg, estado, agora):
     hoje_str = agora.date().isoformat()
     if estado.get("ultimo_fechamento") == hoje_str:
         return
-    if agora.strftime("%H:%M") < "23:45":
+    
+    # Dispara a partir das 23:30 (dentro da janela de descanso obrigatório)
+    hora_str = agora.strftime("%H:%M")
+    if hora_str < "23:30":
         return
 
     sugestoes = estado.get("sugestao_hoje", {})
@@ -828,7 +831,7 @@ def fechar_dia_se_necessario(cfg, estado, agora):
         if info["ultima_data"] != hoje_str:
             info["faltas_seguidas"] += 1
             if info["faltas_seguidas"] >= cfg["regra_never_miss_twice"]["faltas_para_subir_prioridade"]:
-                enviar_mensagem(f"⚠️ {eixo} ficou pra trás — prioridade sobe (never miss twice).")
+                enviar_mensagem(f"⚠️ {eixo} ficou para trás — prioridade sobe (never miss twice).")
 
     estado["sugestao_hoje"] = {}
     estado["janela_notificada_hoje"] = {}

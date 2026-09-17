@@ -7,7 +7,7 @@
     {"nome": "CTeSP_Aulas", "dias": ["seg","ter","qua","sex"], "inicio": "18:30", "fim": "22:15"}
   ],
   "janelas_estudo": [
-    {"nome": "Lanche", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
+    {"nome": "Foco", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
     {"nome": "Quinta_Leve", "dias": ["qui"], "inicio": "18:30", "fim": "19:45"},
     {"nome": "Sabado_Manha", "dias": ["sab"], "inicio": "09:30", "fim": "12:15"}
   ],

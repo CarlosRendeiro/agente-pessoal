@@ -8,7 +8,7 @@
   ],
   "janelas_estudo": [
     {"nome": "Foco", "dias": ["seg","ter","qua","qui","sex"], "inicio": "17:30", "fim": "18:30"},
-    {"nome": "Quinta_Leve", "dias": ["qui"], "inicio": "18:30", "fim": "19:45"},
+    {"nome": "Quinta_Leve", "dias": ["qui"], "inicio": "18:30", "fim": "21:00"},
     {"nome": "Sabado_Manha", "dias": ["sab"], "inicio": "09:00", "fim": "12:15"}
   ],
   "duracao_bloco_min": 45,

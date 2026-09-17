@@ -1,5 +1,5 @@
 {
-  "_comentario": "Cada eixo tem um dia fixo da semana. Sabado fica livre para revisao/catch-up via repeticao espacada.",
+  "_comentario": "Cada eixo tem um dia fixo da semana (seg a sex). Sabado fica livre para revisao/catch-up via repeticao espacada.",
   "fuso_horario": "Europe/Lisbon",
   "compromissos_fixos": [
     {"nome": "Treino_Caminhada", "dias": ["seg","ter","qua","qui","sex"], "inicio": "08:00", "fim": "08:20"},

@@ -779,8 +779,13 @@ def verificar_bloco_de_estudo(cfg, estado, agora):
     if eixo_fixo:
         eixo = eixo_fixo
         info = estado["eixos"].get(eixo, eixo_info_default())
-        atraso = dias_atraso(agora.date(), info["proxima_revisao"])
-        eh_revisao = atraso >= 0
+        proxima = info["proxima_revisao"]
+        atraso_bruto = dias_atraso(agora.date(), proxima)
+        # Corrigido: só é "revisão" se já houver uma proxima_revisao definida e ela
+        # já tiver vencido. Sem isto, um eixo nunca estudado (proxima_revisao=null)
+        # era anunciado como "revisão atrasada há 9999 dias" em vez de "Estudo".
+        eh_revisao = proxima is not None and atraso_bruto >= 0
+        atraso = atraso_bruto if eh_revisao else 0
     else:
         eixo, eh_revisao, atraso = escolher_eixo(cfg, estado, agora.date())
 
